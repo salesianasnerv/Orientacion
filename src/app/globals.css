@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Colores corporativos (Manual de Identidad Salesianas) */
+@theme {
+  --color-azul: #3490b0;
+  --color-azul-oscuro: #2a7591;
+  --color-verde: #b6bc00;
+  --color-naranja: #ee712a;
+  --color-fondo: #f5f7f8;
+  --color-borde: #e2e8ec;
+  --color-gris: #5b6770;
+  --font-sans: "DIN Next", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background: var(--color-fondo);
+  color: #1f2a30;
+  font-family: var(--font-sans);
+}
