@@ -5,7 +5,7 @@ insert into etapa (id, codigo, nombre) values (3, 'ESO', 'Educación Secundaria 
 insert into nivel (id, etapa_id, orden, nombre) values
   (31, 3, 1, '1º ESO'), (32, 3, 2, '2º ESO'), (33, 3, 3, '3º ESO'), (34, 3, 4, '4º ESO');
 
-insert into curso_academico (nombre, activo) values ('2025-26', false), ('2026-27', true);
+insert into curso_academico (nombre, activo) values ('2026-27', true);
 
 insert into tipo_neae (codigo, nombre) values
   ('NEE',  'Necesidades educativas especiales'),

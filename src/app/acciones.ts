@@ -47,19 +47,36 @@ export async function crearFichaCurso(form: FormData) {
 
   const { data: anterior } = await supabase
     .from("ficha_curso")
-    .select("censado, tipo_neae, diagnostico, dictamen, propuesta_medidas")
+    .select("id, censado, tipo_neae, diagnostico, dictamen, propuesta_medidas")
     .eq("alumno_id", alumnoId)
     .lt("curso_academico_id", cursoId)
     .order("curso_academico_id", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  const { error } = await supabase
+  const { id: anteriorId, ...datos } = anterior ?? { id: null };
+  const { data: nueva, error } = await supabase
     .from("ficha_curso")
-    .insert({ alumno_id: alumnoId, curso_academico_id: cursoId, ...(anterior ?? {}) });
+    .insert({ alumno_id: alumnoId, curso_academico_id: cursoId, ...datos })
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
 
+  // Punto de partida: las mismas medidas que el curso anterior
+  if (anteriorId) {
+    const { data: previas } = await supabase.from("medida_alumno").select("medida_id").eq("ficha_id", anteriorId).is("evaluacion", null);
+    if (previas?.length) {
+      await supabase.from("medida_alumno").insert(previas.map((m) => ({ ficha_id: nueva.id, medida_id: m.medida_id, evaluacion: null })));
+    }
+  }
+
   redirect(`/alumno/${alumnoId}/editar?curso=${cursoId}`);
+}
+
+function enlace(form: FormData, campo: string) {
+  const v = texto(form, campo);
+  if (v && !v.startsWith("https://salesianas.sharepoint.com/")) throw new Error("Los enlaces deben ser de https://salesianas.sharepoint.com/");
+  return v;
 }
 
 export async function guardarFicha(form: FormData) {
@@ -74,9 +91,6 @@ export async function guardarFicha(form: FormData) {
       dictamen: form.get("dictamen") === "on",
       tipo_neae: texto(form, "tipo_neae"),
       diagnostico: texto(form, "diagnostico"),
-      materias: texto(form, "materias"),
-      atencion_recibida: texto(form, "atencion_recibida"),
-      observaciones: texto(form, "observaciones"),
       propuesta_medidas: texto(form, "propuesta_medidas"),
     })
     .eq("id", fichaId)
@@ -84,7 +98,29 @@ export async function guardarFicha(form: FormData) {
   if (error) throw new Error(error.message);
   if (!data?.length) throw new Error(SIN_PERMISO);
 
-  revalidatePath(`/alumno/${alumnoId}`);
+  // Medidas del curso: deja marcadas exactamente las casillas enviadas
+  const marcadas = new Set(form.getAll("medida").map(Number));
+  const { data: actuales } = await supabase.from("medida_alumno").select("id, medida_id").eq("ficha_id", fichaId).is("evaluacion", null);
+  const quitar = (actuales ?? []).filter((m) => !marcadas.has(m.medida_id)).map((m) => m.id);
+  const poner = [...marcadas].filter((id) => !(actuales ?? []).some((m) => m.medida_id === id));
+  if (quitar.length) {
+    const { error: e } = await supabase.from("medida_alumno").delete().in("id", quitar);
+    if (e) throw new Error(e.message);
+  }
+  if (poner.length) {
+    const { error: e } = await supabase.from("medida_alumno").insert(poner.map((medida_id) => ({ ficha_id: fichaId, medida_id, evaluacion: null })));
+    if (e) throw new Error(e.message);
+  }
+
+  if (form.has("expediente_url")) {
+    const { error: e } = await supabase
+      .from("alumno")
+      .update({ expediente_url: enlace(form, "expediente_url"), carpeta_medidas_url: enlace(form, "carpeta_medidas_url") })
+      .eq("id", alumnoId);
+    if (e) throw new Error(e.message);
+  }
+
+  revalidatePath("/", "layout");
   redirect(`/alumno/${alumnoId}?curso=${data[0].curso_academico_id}`);
 }
 

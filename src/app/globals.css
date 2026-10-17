@@ -9,6 +9,23 @@ nav.menu > a { font: inherit; padding: 13px 14px; font-size: 15px; color: var(--
 nav.menu > a:hover { color: var(--azul); }
 nav.menu > a.activa { color: var(--azul); border-bottom-color: var(--verde); font-weight: 600; }
 nav.menu .sep { flex: 1; }
+.menu-g:focus-within .desplegable { display: block; }
+.desplegable a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border-radius: 8px; color: var(--texto); text-decoration: none; }
+.desplegable a:hover, .desplegable a.activo { background: rgba(0, 154, 187, .12); color: var(--azul); }
+
+/* Submenú de Atención a la diversidad (también útil en móvil, donde no hay «hover») */
+.submenu { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px 0; max-width: 1280px; margin: 0 auto; }
+.submenu a { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--borde); background: var(--panel); color: var(--suave); text-decoration: none; font-size: 14px; font-weight: 600; }
+.submenu a:hover { border-color: var(--azul); color: var(--azul); }
+.submenu a.activo { background: var(--azul-bg); border-color: transparent; color: var(--azul); }
+
+/* Documento leído dentro de la web (Markdown) */
+.documento { max-width: 820px; line-height: 1.65; }
+.documento h1, .documento h2, .documento h3 { color: var(--azul); line-height: 1.25; }
+.documento h2::before { display: none; }
+.documento ul { padding-left: 22px; }
+.documento table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: 10px 0; }
+.documento th, .documento td { border: 1px solid var(--borde); padding: 6px 8px; text-align: left; vertical-align: top; }
 
 /* Tarjetas de grupo */
 .rejilla-grupos { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; }
@@ -24,11 +41,46 @@ nav.menu .sep { flex: 1; }
 .cab-ficha { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .cab-ficha h1 { margin: 0; font-size: 1.5rem; }
 .texto-largo { white-space: pre-line; line-height: 1.55; margin: 0; }
-.historial { list-style: none; margin: 0; padding: 0; }
-.historial li { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 14px; padding: 10px 0; border-top: 1px solid var(--borde); }
-.historial li:first-child { border-top: 0; }
-.historial .etiqueta { font-weight: 600; color: var(--azul); }
-@media (max-width: 700px) { .historial li { grid-template-columns: 1fr; gap: 2px; } }
+/* Histórico: desplegables, el más reciente arriba y abierto */
+.historial { display: flex; flex-direction: column; gap: 6px; }
+.historial details { border: 1px solid var(--borde); border-radius: 10px; background: var(--bg); }
+.historial summary { cursor: pointer; padding: 8px 12px; font-weight: 600; color: var(--azul); list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+.historial summary::-webkit-details-marker { display: none; }
+.historial summary::after { content: ""; flex: none; width: 7px; height: 7px; margin-top: 6px; border-right: 2px solid var(--suave); border-bottom: 2px solid var(--suave); transform: rotate(45deg); transition: transform .15s; }
+.historial details[open] summary::after { transform: rotate(-135deg); margin-top: 9px; }
+.historial details > p { padding: 0 12px 10px; font-size: .92rem; }
+
+/* Medidas en la ficha */
+.bloque-medidas { margin-bottom: 8px; }
+.lista-medidas { margin: 4px 0 0; padding-left: 20px; }
+.lista-medidas li { margin: 2px 0; }
+details.notas { margin-top: 12px; border-top: 1px solid var(--borde); padding-top: 10px; }
+details.notas summary { cursor: pointer; font-weight: 600; color: var(--suave); }
+.enlaces { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.enlaces .btn { white-space: normal; text-align: center; }
+
+/* Buscador (pestaña Alumnado) */
+.filtros-bd { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.filtros-bd .ancho { grid-column: span 3; }
+.filtros-bd .ancho-2 { grid-column: span 3; }
+.filtros-bd input, .filtros-bd select { width: 100%; }
+@media (max-width: 900px) { .filtros-bd { grid-template-columns: 1fr 1fr; } .filtros-bd .ancho, .filtros-bd .ancho-2 { grid-column: 1 / -1; } }
+.tabla-bd td { vertical-align: top; }
+.enlace-fila { font-weight: 600; text-decoration: none; }
+.enlace-fila:hover { text-decoration: underline; }
+.nowrap { white-space: nowrap; }
+.diag { max-width: 340px; }
+
+/* Casillas de medidas (editar ficha) */
+.casillas-medidas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px 16px; margin: 6px 0 12px; }
+.casillas-medidas label { display: flex; align-items: flex-start; gap: 8px; padding: 5px 8px; border-radius: 8px; cursor: pointer; font-size: .92rem; }
+.casillas-medidas label:hover { background: var(--azul-bg); }
+.casillas-medidas label:has(input:checked) { background: var(--verde-bg); font-weight: 600; }
+.casillas-medidas input { margin-top: 3px; flex: none; }
+details.grupo-medidas { border: 1px solid var(--borde); border-radius: 12px; margin-bottom: 10px; }
+details.grupo-medidas > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; font-size: 1.05rem; }
+details.grupo-medidas > div { padding: 0 14px 6px; }
+details.grupo-medidas h3 { margin-top: 6px; }
 
 /* Formularios largos */
 .form-ficha { display: flex; flex-direction: column; gap: 12px; }

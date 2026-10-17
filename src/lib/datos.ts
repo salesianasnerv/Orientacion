@@ -5,6 +5,29 @@ export const TIPOS_NEAE: Record<string, string> = {
   COM: "Compensación educativa",
 };
 
+export type Bloque = "general" | "metodologia" | "evaluacion" | "prueba_escrita" | "especifica" | "programa";
+
+export type Medida = { id: number; codigo: string | null; nombre: string; bloque: Bloque; descripcion: string | null; orden: number };
+
+// Bloques en el orden de los documentos de Orientación, agrupados como se muestran en la ficha
+export const BLOQUES: { clave: Bloque; titulo: string; abrev: string }[] = [
+  { clave: "general", titulo: "Medidas generales", abrev: "MG" },
+  { clave: "metodologia", titulo: "Metodología", abrev: "MET" },
+  { clave: "evaluacion", titulo: "Evaluación", abrev: "EV" },
+  { clave: "prueba_escrita", titulo: "Adaptación de las pruebas escritas", abrev: "PE" },
+  { clave: "especifica", titulo: "Medidas específicas", abrev: "ESP" },
+  { clave: "programa", titulo: "Programas de atención a la diversidad", abrev: "PROG" },
+];
+
+export const GRUPOS_DE_BLOQUES = [
+  { titulo: "Medidas generales", bloques: ["general", "metodologia", "evaluacion", "prueba_escrita"] as Bloque[] },
+  { titulo: "Medidas específicas y programas", bloques: ["especifica", "programa"] as Bloque[] },
+];
+
+export function tituloBloque(b: Bloque) {
+  return BLOQUES.find((x) => x.clave === b)?.titulo ?? b;
+}
+
 export type Grupo = {
   id: string;
   letra: string;

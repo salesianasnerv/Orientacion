@@ -42,7 +42,7 @@ export default async function PaginaGrupo({ params }: { params: Promise<{ id: st
       perfil={perfil}
       curso={grupo.curso.nombre}
       pestana="grupos"
-      migas={<><Link href={`/?curso=${grupo.curso_academico_id}`}>Grupos {grupo.curso.nombre}</Link> › <b>{nombreGrupo(grupo)}</b></>}
+      migas={<><Link href={`/grupos?curso=${grupo.curso_academico_id}`}>Grupos {grupo.curso.nombre}</Link> › <b>{nombreGrupo(grupo)}</b></>}
     >
       <div className="cab-ficha">
         <div>
