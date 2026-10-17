@@ -3,6 +3,7 @@
 Fichas del alumnado, medidas de atención a la diversidad y seguimiento. Etapa inicial: ESO.
 
 - Diseño: `Plataforma Orientación - Diseño.md` (carpeta de Orientación en OneDrive)
+- Fase 1 (grupos, fichas, administración): [docs/puesta-en-marcha-fase-1.md](docs/puesta-en-marcha-fase-1.md)
 - Puesta en marcha: [docs/guia-entra-id-y-supabase.md](docs/guia-entra-id-y-supabase.md) — usa el mismo proyecto de Supabase (y el mismo acceso Microsoft 365) que Control de baños
 
 ## Estructura
@@ -13,6 +14,10 @@ Fichas del alumnado, medidas de atención a la diversidad y seguimiento. Etapa i
 | `src/lib/supabase/` | Clientes de Supabase (navegador, servidor, middleware) |
 | `src/app/login` | Acceso con Microsoft 365 |
 | `src/app/auth/` | Retorno de Microsoft y cierre de sesión |
+| `src/app/grupo`, `src/app/alumno` | Grupos, fichas e histórico |
+| `src/app/admin` | Perfiles, cursos, tutores y sincronización con Control de baños |
+| `src/app/corporativo.css` | Hoja corporativa común (copiada de Horarios); lo propio va en `globals.css` |
+| `privado/` | Importaciones con datos del alumnado (no se sube a git) |
 
 ## Permisos
 

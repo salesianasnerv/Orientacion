@@ -18,12 +18,8 @@ export function BotonMicrosoft() {
   }
 
   return (
-    <button
-      onClick={entrar}
-      disabled={cargando}
-      className="flex w-full items-center justify-center gap-3 rounded-md bg-azul px-4 py-3 font-medium text-white hover:bg-azul-oscuro disabled:opacity-60"
-    >
-      <svg width="18" height="18" viewBox="0 0 21 21" aria-hidden>
+    <button id="entrar" type="button" onClick={entrar} disabled={cargando} className="btn pri grande btn-ms">
+      <svg viewBox="0 0 21 21" aria-hidden="true">
         <rect x="1" y="1" width="9" height="9" fill="#f25022" />
         <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
         <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
