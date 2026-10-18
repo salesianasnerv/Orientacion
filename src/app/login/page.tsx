@@ -1,5 +1,6 @@
 import { Marco } from "@/components/Marco";
 import { BotonMicrosoft } from "./BotonMicrosoft";
+import { EntrarDesdeTeams } from "./EntrarDesdeTeams";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
@@ -10,6 +11,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="tarjeta">
           <h1>Iniciar sesión</h1>
           <p>Pulsa el botón y entra con tu cuenta del colegio <strong>@salesianas.org</strong>.</p>
+          <EntrarDesdeTeams />
           <BotonMicrosoft />
           <p className="error">{error && "No se ha podido iniciar sesión. Inténtalo de nuevo o avisa a Orientación."}</p>
         </div>

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { opcionesCookies } from "./cookies";
 
 const RUTAS_PUBLICAS = ["/login", "/auth"];
 
@@ -20,6 +21,7 @@ export async function actualizarSesion(request: NextRequest) {
     url,
     anonKey,
     {
+      cookieOptions: opcionesCookies,
       cookies: {
         getAll() {
           return request.cookies.getAll();
