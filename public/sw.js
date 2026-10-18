@@ -1,9 +1,9 @@
 // Permite instalar Orientación como app y que abra rápido.
 // Solo se guardan los archivos de diseño (estilos, código e iconos); las páginas con datos
 // del alumnado NUNCA se guardan en el dispositivo: siempre se piden al servidor.
-const VERSION = 'v1';
+const VERSION = 'v2'; // al cambiar la versión se borra la caché anterior (v2: icono nuevo)
 const CACHE = `orientacion-${VERSION}`;
-const ESTATICO = /^\/(_next\/static\/|icon-|logo\.svg|og-image\.png|favicon\.ico)/;
+const ESTATICO = /^\/(_next\/static\/|icon-|logo\.svg|og-image\.png)/;
 
 self.addEventListener('install', () => self.skipWaiting());
 
