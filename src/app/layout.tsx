@@ -9,6 +9,17 @@ export const metadata: Metadata = {
   title: "Orientación | Escuelas Salesianas María Auxiliadora · Nervión (Sevilla)",
   description: "Fichas del alumnado, medidas de atención a la diversidad y seguimiento de Orientación (ESO).",
   robots: { index: false, follow: false },
+  // Mismos iconos que las demás webs del colegio (?v=2 obliga al navegador a olvidar el triángulo de Vercel)
+  icons: {
+    icon: [
+      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/favicon-32.png?v=2", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-48.png?v=2", type: "image/png", sizes: "48x48" },
+      { url: "/favicon-192.png?v=2", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/favicon.ico?v=2",
+    apple: { url: "/icon-180.png?v=2", sizes: "180x180" },
+  },
   metadataBase: new URL("https://orientacion-nervion.vercel.app"),
   applicationName: "Orientación",
   appleWebApp: { capable: true, title: "Orientación", statusBarStyle: "default" },
