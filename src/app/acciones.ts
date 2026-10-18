@@ -230,7 +230,7 @@ export async function guardarPersona(form: FormData) {
   const email = texto(form, "email")?.toLowerCase();
   const nombre = texto(form, "nombre");
   if (!email || !nombre) volverAdmin("perfiles", "error", "El nombre y el email son obligatorios.");
-  if (!email.endsWith("@salesianas.org")) volverAdmin("perfiles", "error", "El email debe ser @salesianas.org.");
+  if (!/@salesian[ae]s\.org$/.test(email)) volverAdmin("perfiles", "error", "El email debe ser @salesianas.org (o @salesianes.org).");
 
   const fila = {
     email,
