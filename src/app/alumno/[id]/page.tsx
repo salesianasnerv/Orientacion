@@ -37,8 +37,6 @@ export default async function PaginaAlumno({ params, searchParams }: { params: P
           {cursosAlumno.length > 1 && cursosAlumno.map((c) => (
             <Link key={c.id} href={`/alumno/${id}?curso=${c.id}`} className={`btn mini ${c.id === curso?.id ? "pri" : ""}`}>{c.nombre}</Link>
           ))}
-          {ficha && <a href={`/alumno/${id}/ficha/docx?curso=${curso?.id}`} className="btn">Ficha en Word</a>}
-          {ficha && <Link href={`/alumno/${id}/ficha?curso=${curso?.id}`} className="btn">Ficha en PDF</Link>}
           {ficha && <Link href={`/alumno/${id}/seguimiento?curso=${curso?.id}`} className="btn">Generar documento de seguimiento</Link>}
           {d.puedeEditar && ficha && <Link href={`/alumno/${id}/editar?curso=${curso?.id}`} className="btn pri">Editar ficha</Link>}
           {!d.puedeEditar && <Chip>Solo consulta</Chip>}

@@ -36,18 +36,6 @@ nav.menu .sep { flex: 1; }
 .tarjeta-grupo h3 { margin: 0; font-size: 1.15rem; }
 .tarjeta-grupo .tutor { color: var(--suave); font-size: .88rem; margin: 2px 0 10px; }
 .tarjeta-grupo .cifra { font-size: 1.7rem; font-weight: 700; color: var(--azul); line-height: 1; }
-.tarjeta-grupo .marcas-grupo { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
-/* Grupos por curso (una fila por nivel) y resumen */
-.nivel-grupos { margin-top: 22px; }
-.nivel-grupos h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font-size: 1.2rem; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--verde-bg); }
-.nivel-grupos h2 .small { font-weight: 400; }
-.resumen-grupos { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-.resumen-grupos > div { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; font-size: .82rem; color: var(--suave); }
-.resumen-grupos .cifra { font-size: 1.6rem; font-weight: 700; line-height: 1.1; color: var(--texto); }
-.resumen-grupos .cifra.azul { color: var(--azul); } .resumen-grupos .cifra.naranja { color: var(--naranja); }
-.resumen-grupos .cifra.morado { color: var(--morado); } .resumen-grupos .cifra.rojo { color: var(--rojo); }
-@media (max-width: 900px) { .resumen-grupos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .resumen-grupos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* Ficha del alumno/a */
 .cab-ficha { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
@@ -72,22 +60,11 @@ details.notas summary { cursor: pointer; font-weight: 600; color: var(--suave); 
 .enlaces .btn { white-space: normal; text-align: center; }
 
 /* Buscador (pestaña Alumnado) */
-.filtros-bd { display: grid; gap: 10px; }
-.filtros-fila { display: grid; gap: 10px; align-items: end; }
-.filtros-fila.f-buscar { grid-template-columns: 2fr 1fr; }
-.filtros-fila.f-cuatro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.filtros-fila.f-dos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.filtros-bd { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.filtros-bd .ancho { grid-column: span 3; }
+.filtros-bd .ancho-2 { grid-column: span 3; }
 .filtros-bd input, .filtros-bd select { width: 100%; }
-@media (max-width: 900px) { .filtros-fila.f-buscar, .filtros-fila.f-dos { grid-template-columns: 1fr; } .filtros-fila.f-cuatro { grid-template-columns: 1fr 1fr; } }
-/* Listado del buscador como desplegable */
-details.listado-bd { margin-top: 14px; border: 1px solid var(--borde); border-radius: 12px; }
-details.listado-bd > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 14px; font-weight: 700; user-select: none; }
-details.listado-bd > summary::-webkit-details-marker { display: none; }
-details.listado-bd > summary .flechita { margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--suave); border-bottom: 2px solid var(--suave); transform: rotate(45deg); transition: transform .15s; }
-details.listado-bd[open] > summary .flechita { transform: rotate(-135deg); }
-details.listado-bd[open] > summary { border-bottom: 1px solid var(--borde); }
-details.listado-bd > .tabla-wrap, details.listado-bd > .vacio { margin: 0; padding: 10px; }
-.tabla-bd .marcas { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+@media (max-width: 900px) { .filtros-bd { grid-template-columns: 1fr 1fr; } .filtros-bd .ancho, .filtros-bd .ancho-2 { grid-column: 1 / -1; } }
 .tabla-bd td { vertical-align: top; }
 .enlace-fila { font-weight: 600; text-decoration: none; }
 .enlace-fila:hover { text-decoration: underline; }

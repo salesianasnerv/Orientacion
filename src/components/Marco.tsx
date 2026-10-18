@@ -28,9 +28,9 @@ export function Svg({ i }: { i: keyof typeof Icono }) {
 }
 
 // Presentación de la portada: qué es el portal y qué puede hacer cada perfil (como en las demás webs del colegio).
-function Presentacion({ separada }: { separada: boolean }) {
+function Presentacion() {
   return (
-    <section className={`presenta ${separada ? "separada" : ""}`}>
+    <section className="presenta">
       <div className="presenta-sup">
         <div className="cartel" role="navigation" aria-label="Estás en">
           <a href="https://claustro-utilidades.vercel.app/" title="Ir al portal de utilidades del profesorado"><Svg i="casa" />Utilidades</a>
@@ -119,7 +119,7 @@ export function Marco({
           </form>
         </div>
       )}
-      {portada && <Presentacion separada={sinSesion} />}
+      {portada && <Presentacion />}
       {perfil?.es_personal && (
         <nav className="menu" aria-label="Secciones">
           <div className="menu-g" tabIndex={-1}>

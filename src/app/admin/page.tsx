@@ -47,7 +47,7 @@ export default async function Administracion({
       <div className={`aviso ${sharepoint === "ok" ? "info" : sharepoint === "error" ? "error" : ""}`}>
         <b>SharePoint en directo:</b>{" "}
         {sharepoint === "ok" && "conectado. Recursos, Plantillas, Proceso de derivación y las plantillas del documento de seguimiento se leen de SharePoint (los cambios se ven en unos 5 minutos)."}
-        {sharepoint === "sin" && "desactivado (es opcional; la web funciona igual). Recursos, Plantillas y Proceso de derivación muestran la lista de documentos guardada en la propia web, así que un documento nuevo o renombrado en SharePoint no aparece aquí hasta que se actualice la web. Para que se lean solos de SharePoint, un administrador de Microsoft 365 del colegio tiene que dar permiso de lectura (guía: docs/guia-sharepoint-en-directo.md)."}
+        {sharepoint === "sin" && "sin configurar. La web usa sus listas fijas. Pasos en docs/guia-sharepoint-en-directo.md."}
         {sharepoint === "error" && "configurado, pero Microsoft no da acceso. Revisa los permisos y el secreto (docs/guia-sharepoint-en-directo.md)."}
       </div>
       {seccion === "perfiles" ? <Perfiles personal={personal ?? []} miEmail={perfil.email} /> : <Cursos cursos={cursos ?? []} personal={personal ?? []} />}

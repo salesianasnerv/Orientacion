@@ -14,8 +14,6 @@ export type FilaAlumno = {
   dictamen: boolean;
   diagnostico: string | null;
   medidas: number[];
-  repetidor: boolean;
-  pendientes: number; // nº de materias pendientes de cursos anteriores
 };
 
 const SELECT_GRUPO = "id, letra, curso_academico_id, nivel:nivel_id(nombre, orden), tutor:tutor_id(nombre, email)";
@@ -43,32 +41,26 @@ export async function alumnadoDelCurso(cursoId: number): Promise<FilaAlumno[]> {
   const supabase = await createClient();
   const [grupos, { data: matriculas }, { data: fichas }] = await Promise.all([
     gruposDelCurso(cursoId),
-    supabase.from("matricula").select("alumno_id, grupo_id, repetidor, materias_pendientes").eq("curso_academico_id", cursoId),
+    supabase.from("matricula").select("alumno_id, grupo_id").eq("curso_academico_id", cursoId),
     supabase.from("ficha_curso").select("id, alumno_id, censado, tipo_neae, dictamen, diagnostico").eq("curso_academico_id", cursoId),
   ]);
   const ids = [...new Set([...(matriculas ?? []).map((m) => m.alumno_id), ...(fichas ?? []).map((f) => f.alumno_id)])];
   const fichaIds = (fichas ?? []).map((f) => f.id);
-  const [{ data: alumnos }, { data: medidas }, { data: pendientes }] = await Promise.all([
+  const [{ data: alumnos }, { data: medidas }] = await Promise.all([
     supabase.from("alumno").select("id, nombre, apellidos").in("id", ids),
     supabase.from("medida_alumno").select("ficha_id, medida_id").in("ficha_id", fichaIds),
-    supabase.from("materia_pendiente").select("ficha_id").in("ficha_id", fichaIds),
   ]);
 
   const grupoDe = new Map(grupos.map((g) => [g.id, g]));
-  const matriculaDe = new Map((matriculas ?? []).map((m) => [m.alumno_id, m]));
+  const matriculaDe = new Map((matriculas ?? []).map((m) => [m.alumno_id, m.grupo_id]));
   const fichaDe = new Map((fichas ?? []).map((f) => [f.alumno_id, f]));
   const medidasDe = new Map<string, number[]>();
   (medidas ?? []).forEach((m) => medidasDe.set(m.ficha_id, [...(medidasDe.get(m.ficha_id) ?? []), m.medida_id]));
-  const pendientesDe = new Map<string, number>();
-  (pendientes ?? []).forEach((p) => pendientesDe.set(p.ficha_id, (pendientesDe.get(p.ficha_id) ?? 0) + 1));
 
   return (alumnos ?? [])
     .map((a) => {
-      const m = matriculaDe.get(a.id);
-      const g = grupoDe.get(m?.grupo_id ?? "");
+      const g = grupoDe.get(matriculaDe.get(a.id) ?? "");
       const f = fichaDe.get(a.id);
-      // Materias pendientes: las de la ficha (una por fila) o, si no hay, el texto antiguo de la matrícula
-      const textoPendientes = m?.materias_pendientes?.split(/[,;\n]/).filter((x: string) => x.trim()).length ?? 0;
       return {
         id: a.id,
         nombre: a.nombre,
@@ -82,8 +74,6 @@ export async function alumnadoDelCurso(cursoId: number): Promise<FilaAlumno[]> {
         dictamen: f?.dictamen ?? false,
         diagnostico: f?.diagnostico ?? null,
         medidas: f ? (medidasDe.get(f.id) ?? []) : [],
-        repetidor: m?.repetidor ?? false,
-        pendientes: (f && pendientesDe.get(f.id)) || textoPendientes,
       };
     })
     .sort((x, y) => x.nivelOrden - y.nivelOrden || x.grupo.localeCompare(y.grupo) || x.apellidos.localeCompare(y.apellidos, "es"));
