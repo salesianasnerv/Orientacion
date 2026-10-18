@@ -70,16 +70,23 @@ create policy "quitar permiso" on permisos for delete to authenticated using (
   or (web = 'reservas' and es_admin_reservas() and email <> email_jwt())
   or (tiene_permiso('todas') and email <> email_jwt()));
 
--- Las tablas antiguas pasan a ser vistas sobre «permisos» (se pueden leer, añadir y borrar igual que antes)
-drop table administradores;
-drop table hor_admins;
-drop table res_admin;
+-- Las tablas antiguas pasan a ser vistas sobre «permisos» (se pueden leer, añadir y borrar igual que antes).
+-- Si el script ya se ejecutó, ya son vistas: solo se borran mientras sigan siendo tablas.
+do $$
+declare t text;
+begin
+  foreach t in array array['administradores', 'hor_admins', 'res_admin'] loop
+    if exists (select 1 from pg_tables where schemaname = 'public' and tablename = t) then
+      execute format('drop table public.%I', t);
+    end if;
+  end loop;
+end $$;
 
-create view administradores with (security_invoker = true) as
+create or replace view administradores with (security_invoker = true) as
   select email, creado, web from permisos where web = 'banos' with cascaded check option;
-create view hor_admins with (security_invoker = true) as
+create or replace view hor_admins with (security_invoker = true) as
   select email, web from permisos where web = 'horarios' with cascaded check option;
-create view res_admin with (security_invoker = true) as
+create or replace view res_admin with (security_invoker = true) as
   select email, creado, web from permisos where web = 'reservas' with cascaded check option;
 
 alter view administradores alter column web set default 'banos';

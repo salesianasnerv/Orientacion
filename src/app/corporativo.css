@@ -397,6 +397,8 @@ details.plegable.sin-panel .cols { gap: 12px; }
 .info-bloque li + li { margin-top: 3px; }
 .info-bloque b { color: var(--texto); font-weight: 600; }
 .presenta + nav.menu { border-top: 2px solid rgba(180, 190, 0, .55); }
+/* Sin sesión: separador a todo el ancho antes del cuadro de iniciar sesión (como en las demás webs) */
+.presenta.separada { max-width: none; padding: 22px max(16px, calc((100% - 1280px) / 2 + 16px)); border-bottom: 2px solid rgba(180, 190, 0, .55); }
 @media (max-width: 560px) {
   .top.solo-logo .logo { height: 54px; }
   .presenta-cab { align-items: flex-start; } .presenta h1 { font-size: 1.3rem; } .presenta-ico { width: 46px; height: 46px; }

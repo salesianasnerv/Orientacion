@@ -10,9 +10,13 @@ const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCa
 export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; medidas: Medida[]; cursoId: number }) {
   const [texto, setTexto] = useState("");
   const [grupo, setGrupo] = useState("");
+  const [repetidor, setRepetidor] = useState("");
+  const [pendientes, setPendientes] = useState("");
   const [tipo, setTipo] = useState("");
   const [seneca, setSeneca] = useState("");
-  const [medida, setMedida] = useState("");
+  const [medidaGen, setMedidaGen] = useState("");
+  const [medidaEsp, setMedidaEsp] = useState("");
+  const [abierto, setAbierto] = useState(false);
 
   const medidaDe = useMemo(() => new Map(medidas.map((m) => [m.id, m])), [medidas]);
   const niveles = useMemo(() => [...new Set(filas.map((f) => f.grupo.replace(/ [A-Z]$/, "")))].filter((n) => n !== "—"), [filas]);
@@ -23,90 +27,133 @@ export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; med
     return filas.filter((f) => {
       if (t && !norm(`${f.apellidos} ${f.nombre} ${f.nombre} ${f.apellidos} ${f.diagnostico ?? ""}`).includes(t)) return false;
       if (grupo && !(f.grupo === grupo || f.grupo.startsWith(grupo + " "))) return false;
+      if (repetidor && f.repetidor !== (repetidor === "si")) return false;
+      if (pendientes && f.pendientes > 0 !== (pendientes === "si")) return false;
       if (tipo === "-" ? f.tipo : tipo && f.tipo !== tipo) return false;
       if (seneca === "censado" && f.censado !== true) return false;
       if (seneca === "sin" && f.censado !== false) return false;
       if (seneca === "dictamen" && !f.dictamen) return false;
-      if (!cumpleMedida(f.medidas, medida, medidaDe)) return false;
+      if (!cumpleMedida(f.medidas, medidaGen, medidaDe)) return false;
+      if (!cumpleMedida(f.medidas, medidaEsp, medidaDe)) return false;
       return true;
     });
-  }, [filas, texto, grupo, tipo, seneca, medida, medidaDe]);
+  }, [filas, texto, grupo, repetidor, pendientes, tipo, seneca, medidaGen, medidaEsp, medidaDe]);
 
-  const hayFiltros = texto || grupo || tipo || seneca || medida;
-  const limpiar = () => { setTexto(""); setGrupo(""); setTipo(""); setSeneca(""); setMedida(""); };
+  const hayFiltros = !!(texto || grupo || repetidor || pendientes || tipo || seneca || medidaGen || medidaEsp);
+  const limpiar = () => { setTexto(""); setGrupo(""); setRepetidor(""); setPendientes(""); setTipo(""); setSeneca(""); setMedidaGen(""); setMedidaEsp(""); };
+  // Al filtrar se abre el listado; sin filtros queda como estaba
+  const filtra = <T,>(set: (v: T) => void) => (v: T) => { set(v); setAbierto(true); };
 
   return (
     <section className="panel">
       <div className="filtros-bd">
-        <label className="campo ancho">
-          Buscar alumno/a
-          <input type="search" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nombre, apellidos o diagnóstico (p. ej. «dislexia»)" autoFocus />
-        </label>
-        <label className="campo">
-          Curso / grupo
-          <select value={grupo} onChange={(e) => setGrupo(e.target.value)}>
-            <option value="">Todos</option>
-            {niveles.map((n) => (
-              <optgroup key={n} label={n}>
-                <option value={n}>{n} (todos)</option>
-                {grupos.filter((g) => g.startsWith(n + " ")).map((g) => <option key={g} value={g}>{g}</option>)}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-        <label className="campo">
-          Tipo de NEAE
-          <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
-            <option value="">Todos</option>
-            {Object.entries(TIPOS_NEAE).map(([k, v]) => <option key={k} value={k}>{k} · {v}</option>)}
-            <option value="-">Sin tipo indicado</option>
-          </select>
-        </label>
-        <label className="campo">
-          Séneca
-          <select value={seneca} onChange={(e) => setSeneca(e.target.value)}>
-            <option value="">Todos</option>
-            <option value="censado">Censado</option>
-            <option value="sin">Sin censar</option>
-            <option value="dictamen">Con dictamen</option>
-          </select>
-        </label>
-        <label className="campo ancho-2">
-          Medida
-          <SelectorMedida value={medida} onChange={setMedida} medidas={medidas} />
-        </label>
-      </div>
-
-      <div className="barra" style={{ marginTop: 12 }}>
-        <strong>{visibles.length} de {filas.length} alumnos/as</strong>
-        {hayFiltros && <button type="button" className="btn mini" onClick={limpiar}>Quitar filtros</button>}
-      </div>
-
-      {visibles.length === 0 ? (
-        <p className="vacio">Ningún alumno/a cumple estos filtros.</p>
-      ) : (
-        <div className="tabla-wrap">
-          <table className="datos tabla-bd">
-            <thead>
-              <tr><th>Alumno/a</th><th>Grupo</th><th>NEAE</th><th>Séneca</th><th>Medidas generales</th><th>Medidas específicas</th><th>Diagnóstico</th></tr>
-            </thead>
-            <tbody>
-              {visibles.map((f) => (
-                <tr key={f.id}>
-                  <td><Link href={`/alumno/${f.id}?curso=${cursoId}`} className="enlace-fila">{f.apellidos}, {f.nombre}</Link></td>
-                  <td className="nowrap">{f.grupo}</td>
-                  <td>{f.tipo ? <span className="chip verde" title={TIPOS_NEAE[f.tipo]}>{f.tipo}</span> : <span className="muted">—</span>}{f.dictamen && <span className="chip morado" style={{ marginLeft: 4 }}>Dict.</span>}</td>
-                  <td>{f.censado === null ? <span className="chip">Sin ficha</span> : f.censado ? <span className="chip azul">Censado</span> : <span className="chip naranja">Sin censar</span>}</td>
-                  {GRUPOS_DE_BLOQUES.map((g, i) => (
-                    <td key={g.titulo} className="celda-medidas"><MedidasPlegables ids={f.medidas} medidaDe={medidaDe} bloques={g.bloques} especificas={i === 1} /></td>
-                  ))}
-                  <td className="muted small diag">{f.diagnostico?.split("\n").filter(Boolean).slice(0, 2).join(" · ")}</td>
-                </tr>
+        <div className="filtros-fila f-buscar">
+          <label className="campo">
+            Buscar alumno/a
+            <input type="search" value={texto} onChange={(e) => filtra(setTexto)(e.target.value)} placeholder="Nombre, apellidos o diagnóstico (p. ej. «dislexia»)" autoFocus />
+          </label>
+          <label className="campo">
+            Curso / grupo
+            <select value={grupo} onChange={(e) => filtra(setGrupo)(e.target.value)}>
+              <option value="">Todos</option>
+              {niveles.map((n) => (
+                <optgroup key={n} label={n}>
+                  <option value={n}>{n} (todos)</option>
+                  {grupos.filter((g) => g.startsWith(n + " ")).map((g) => <option key={g} value={g}>{g}</option>)}
+                </optgroup>
               ))}
-            </tbody>
-          </table>
+            </select>
+          </label>
         </div>
-      )}
+        <div className="filtros-fila f-cuatro">
+          <label className="campo">
+            Repetidor/a
+            <select value={repetidor} onChange={(e) => filtra(setRepetidor)(e.target.value)}>
+              <option value="">Todos</option>
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+          <label className="campo">
+            Materias pendientes
+            <select value={pendientes} onChange={(e) => filtra(setPendientes)(e.target.value)}>
+              <option value="">Todos</option>
+              <option value="si">Con pendientes</option>
+              <option value="no">Sin pendientes</option>
+            </select>
+          </label>
+          <label className="campo">
+            Tipo de NEAE
+            <select value={tipo} onChange={(e) => filtra(setTipo)(e.target.value)}>
+              <option value="">Todos</option>
+              {Object.entries(TIPOS_NEAE).map(([k, v]) => <option key={k} value={k}>{k} · {v}</option>)}
+              <option value="-">Sin tipo indicado</option>
+            </select>
+          </label>
+          <label className="campo">
+            Séneca
+            <select value={seneca} onChange={(e) => filtra(setSeneca)(e.target.value)}>
+              <option value="">Todos</option>
+              <option value="censado">Censado</option>
+              <option value="sin">Sin censar</option>
+              <option value="dictamen">Con dictamen</option>
+            </select>
+          </label>
+        </div>
+        <div className="filtros-fila f-dos">
+          <label className="campo">
+            Medidas generales
+            <SelectorMedida value={medidaGen} onChange={filtra(setMedidaGen)} medidas={medidas} bloques={GRUPOS_DE_BLOQUES[0].bloques} />
+          </label>
+          <label className="campo">
+            Medidas específicas
+            <SelectorMedida value={medidaEsp} onChange={filtra(setMedidaEsp)} medidas={medidas} bloques={GRUPOS_DE_BLOQUES[1].bloques} />
+          </label>
+        </div>
+      </div>
+
+      <details className="listado-bd" open={abierto} onToggle={(e) => setAbierto(e.currentTarget.open)}>
+        <summary>
+          <span>Listado del alumnado</span>
+          <span className="chip azul">{hayFiltros ? `${visibles.length} de ${filas.length}` : filas.length} alumnos/as</span>
+          {hayFiltros && <button type="button" className="btn mini" onClick={(e) => { e.preventDefault(); limpiar(); }}>Quitar filtros</button>}
+          <span className="flechita" />
+        </summary>
+
+        {visibles.length === 0 ? (
+          <p className="vacio">Ningún alumno/a cumple estos filtros.</p>
+        ) : (
+          <div className="tabla-wrap">
+            <table className="datos tabla-bd">
+              <thead>
+                <tr><th>Alumno/a</th><th>Grupo</th><th>NEAE</th><th>Séneca</th><th>Medidas generales</th><th>Medidas específicas</th><th>Diagnóstico</th></tr>
+              </thead>
+              <tbody>
+                {visibles.map((f) => (
+                  <tr key={f.id}>
+                    <td>
+                      <Link href={`/alumno/${f.id}?curso=${cursoId}`} className="enlace-fila">{f.apellidos}, {f.nombre}</Link>
+                      {(f.repetidor || f.pendientes > 0) && (
+                        <div className="marcas">
+                          {f.repetidor && <span className="chip rojo">Repetidor/a</span>}
+                          {f.pendientes > 0 && <span className="chip naranja">{f.pendientes} pendiente{f.pendientes > 1 ? "s" : ""}</span>}
+                        </div>
+                      )}
+                    </td>
+                    <td className="nowrap">{f.grupo}</td>
+                    <td>{f.tipo ? <span className="chip verde" title={TIPOS_NEAE[f.tipo]}>{f.tipo}</span> : <span className="muted">—</span>}{f.dictamen && <span className="chip morado" style={{ marginLeft: 4 }}>Dict.</span>}</td>
+                    <td>{f.censado === null ? <span className="chip">Sin ficha</span> : f.censado ? <span className="chip azul">Censado</span> : <span className="chip naranja">Sin censar</span>}</td>
+                    {GRUPOS_DE_BLOQUES.map((g, i) => (
+                      <td key={g.titulo} className="celda-medidas"><MedidasPlegables ids={f.medidas} medidaDe={medidaDe} bloques={g.bloques} especificas={i === 1} /></td>
+                    ))}
+                    <td className="muted small diag">{f.diagnostico?.split("\n").filter(Boolean).slice(0, 2).join(" · ")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </details>
     </section>
   );
 }
@@ -118,11 +165,11 @@ export function cumpleMedida(ids: number[], filtro: string, medidaDe: Map<number
   return ids.includes(Number(filtro));
 }
 
-export function SelectorMedida({ value, onChange, medidas }: { value: string; onChange: (v: string) => void; medidas: Medida[] }) {
+export function SelectorMedida({ value, onChange, medidas, bloques }: { value: string; onChange: (v: string) => void; medidas: Medida[]; bloques?: Medida["bloque"][] }) {
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)}>
       <option value="">Todas</option>
-      {BLOQUES.map((b) => (
+      {BLOQUES.filter((b) => !bloques || bloques.includes(b.clave)).map((b) => (
         <optgroup key={b.clave} label={b.titulo}>
           <option value={`b:${b.clave}`}>Cualquiera de {b.titulo.toLowerCase()}</option>
           {medidas.filter((m) => m.bloque === b.clave).map((m) => (
