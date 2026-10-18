@@ -1,0 +1,54 @@
+/* Ficha imprimible: hoja A4 con la cabecera y el pie de la hoja corporativa vertical */
+.ficha-imp { --v: #8a9400; --v-bg: #eef1c7; --a: #009abb; --n: #ee712a; --g: #5f6368; --b: #c9cca0; padding: 16px; }
+.ficha-barra { max-width: 210mm; margin: 0 auto 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.hoja { position: relative; width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto; background: #fff; color: #222;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, .18); display: flex; flex-direction: column;
+  font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif; font-size: 10.5pt; line-height: 1.32; }
+.hoja-tabla { width: 100%; border-collapse: collapse; flex: 1; }
+.hoja-tabla > thead > tr > td, .hoja-tabla > tbody > tr > td, .hoja-tabla > tfoot > tr > td { padding: 0 30mm; vertical-align: top; }
+.hoja-cab { display: flex; justify-content: space-between; align-items: center; padding: 11mm 0 6mm; }
+.hoja-cab .lema { font-family: var(--fuente-fira), "Fira Sans", sans-serif; font-style: italic; color: #1392b3; font-size: 15pt; letter-spacing: .01em; }
+.hoja-cab img { height: 14mm; width: auto; }
+.hueco-pie { height: 24mm; }
+.hoja-pie { text-align: center; font-family: Arial, sans-serif; color: #1f9cc2; font-size: 8.5pt; line-height: 1.5; }
+.hoja-pie p { margin: 0; }
+.hoja-pie .v { color: #c6c81e; } .hoja-pie .punto { color: #c6c81e; margin: 0 9px; } .hoja-pie .peq { font-size: 7pt; }
+.hoja-pie img { display: block; width: 100%; height: 9.7mm; object-fit: cover; margin-top: 2mm; }
+
+.hoja-cuerpo h1 { margin: 0; text-align: center; color: var(--v); font-size: 16pt; text-transform: uppercase; }
+.hoja-cuerpo .subt { text-align: center; color: var(--g); margin: 2px 0 14px; }
+.hoja-cuerpo h2 { margin: 16px 0 7px; padding-bottom: 2px; color: var(--v); border-bottom: 1.5pt solid var(--v); font-size: 12pt; text-transform: uppercase; break-after: avoid; }
+.hoja-cuerpo h2.h-azul { color: var(--a); border-color: var(--a); }
+.hoja-cuerpo h2.h-naranja { color: var(--n); border-color: var(--n); }
+.hoja-cuerpo h3 { margin: 7px 0 2px; color: var(--g); font-size: 10.5pt; break-after: avoid; }
+.hoja-cuerpo p { margin: 0 0 4px; }
+.hoja-cuerpo .justif { text-align: justify; }
+.hoja-cuerpo ul { margin: 0 0 4px; padding-left: 16px; list-style: none; }
+.hoja-cuerpo li { position: relative; margin: 2px 0; }
+.hoja-cuerpo li::before { content: "•"; position: absolute; left: -12px; color: var(--v); font-weight: 700; }
+.hoja-cuerpo .gris { color: var(--g); } .hoja-cuerpo .azul { color: var(--a); } .hoja-cuerpo .naranja { color: var(--n); }
+.hoja-cuerpo .bloque { break-inside: avoid; }
+.hoja-cuerpo table.t-datos, .hoja-cuerpo table.t-azul { width: 100%; border-collapse: collapse; table-layout: fixed; break-inside: avoid; }
+.hoja-cuerpo .t-datos th, .hoja-cuerpo .t-datos td, .hoja-cuerpo .t-azul th, .hoja-cuerpo .t-azul td { border: .75pt solid var(--b); padding: 3px 6px; text-align: left; vertical-align: middle; }
+.hoja-cuerpo .t-datos th { width: 16%; background: var(--v-bg); color: var(--v); font-size: 9.5pt; }
+.hoja-cuerpo .t-azul th { background: var(--a); color: #fff; }
+.hoja-cuerpo .nota { margin-top: 22px; text-align: center; font-style: italic; color: var(--g); font-size: 8pt; }
+
+@media screen and (max-width: 820px) {
+  .hoja { min-height: 0; }
+  .hoja-tabla > thead > tr > td, .hoja-tabla > tbody > tr > td, .hoja-tabla > tfoot > tr > td { padding: 0 16px; }
+}
+
+@media print {
+  @page { size: A4; margin: 0; }
+  html, body { background: #fff !important; }
+  body > *:not(.ficha-imp) { display: none !important; }
+  /* globals.css oculta todo al imprimir salvo la vista del documento de seguimiento */
+  .ficha-imp, .ficha-imp * { visibility: visible !important; }
+  .ficha-imp { padding: 0; }
+  .hoja { width: auto; min-height: 0; box-shadow: none; display: block; }
+  /* El pie se dibuja abajo en todas las páginas; el hueco del tfoot evita que el texto lo pise */
+  .hoja-pie { position: fixed; left: 0; right: 0; bottom: 0; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
