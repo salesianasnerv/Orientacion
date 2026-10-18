@@ -24,6 +24,13 @@ export const GRUPOS_DE_BLOQUES = [
   { titulo: "Medidas específicas y programas", bloques: ["especifica", "programa"] as Bloque[] },
 ];
 
+// Apartados de «Evaluación de las medidas» en la ficha
+export const EVALUACIONES_MEDIDAS = [
+  { campo: "eval_medidas_1", titulo: "1ª Evaluación" },
+  { campo: "eval_medidas_2", titulo: "2ª Evaluación" },
+  { campo: "eval_medidas_ordinaria", titulo: "Evaluación ordinaria" },
+] as const;
+
 export function tituloBloque(b: Bloque) {
   return BLOQUES.find((x) => x.clave === b)?.titulo ?? b;
 }
@@ -47,9 +54,17 @@ export type Ficha = {
   diagnostico: string | null;
   dictamen: boolean;
   materias: string | null;
+  area?: string | null;
+  profesor_referencia?: string | null;
+  obs_metodologia?: string | null;
+  obs_evaluacion?: string | null;
+  obs_pruebas_escritas?: string | null;
   atencion_recibida: string | null;
   observaciones: string | null;
   propuesta_medidas: string | null;
+  eval_medidas_1: string | null;
+  eval_medidas_2: string | null;
+  eval_medidas_ordinaria: string | null;
 };
 
 export type Alumno = { id: string; nombre: string; apellidos: string; nombre_seneca: string | null };

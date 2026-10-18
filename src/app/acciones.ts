@@ -12,7 +12,7 @@ function texto(form: FormData, campo: string) {
   return v === "" ? null : v;
 }
 
-// Alta en seguimiento de un alumno/a de la lista de clase (Control de baños).
+// Alta en seguimiento de un alumno/a de la lista de clase («Acceso a Microsoft 365»).
 export async function incorporarAlSeguimiento(form: FormData) {
   const grupoId = String(form.get("grupo_id"));
   const cursoId = Number(form.get("curso_academico_id"));
@@ -92,6 +92,9 @@ export async function guardarFicha(form: FormData) {
       tipo_neae: texto(form, "tipo_neae"),
       diagnostico: texto(form, "diagnostico"),
       propuesta_medidas: texto(form, "propuesta_medidas"),
+      eval_medidas_1: texto(form, "eval_medidas_1"),
+      eval_medidas_2: texto(form, "eval_medidas_2"),
+      eval_medidas_ordinaria: texto(form, "eval_medidas_ordinaria"),
     })
     .eq("id", fichaId)
     .select("curso_academico_id");
@@ -109,6 +112,28 @@ export async function guardarFicha(form: FormData) {
   }
   if (poner.length) {
     const { error: e } = await supabase.from("medida_alumno").insert(poner.map((medida_id) => ({ ficha_id: fichaId, medida_id, evaluacion: null })));
+    if (e) throw new Error(e.message);
+  }
+
+  // Repetidor/a: está en la matrícula del curso
+  const { error: eRep } = await supabase
+    .from("matricula")
+    .update({ repetidor: form.get("repetidor") === "on" })
+    .eq("alumno_id", alumnoId)
+    .eq("curso_academico_id", data[0].curso_academico_id);
+  if (eRep) throw new Error(eRep.message);
+
+  // Materias pendientes: se sustituyen por las filas enviadas
+  const niveles = form.getAll("pend_nivel").map(String);
+  const materias = form.getAll("pend_materia").map(String);
+  const profesores = form.getAll("pend_profesor").map(String);
+  const pendientes = niveles
+    .map((nivel, i) => ({ ficha_id: fichaId, nivel, materia: materias[i] ?? "", profesor: profesores[i] || null, orden: i }))
+    .filter((p) => p.nivel && p.materia);
+  const { error: ePend } = await supabase.from("materia_pendiente").delete().eq("ficha_id", fichaId);
+  if (ePend) throw new Error(ePend.message);
+  if (pendientes.length) {
+    const { error: e } = await supabase.from("materia_pendiente").insert(pendientes);
     if (e) throw new Error(e.message);
   }
 

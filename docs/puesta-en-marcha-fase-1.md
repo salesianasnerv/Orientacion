@@ -8,7 +8,7 @@ Ejecuta **en este orden**, cada uno en una consulta nueva, copiando el fichero e
 
 | Orden | Fichero | Qué hace |
 |---|---|---|
-| 1 | `supabase/migrations/20261017000300_padron_control_banos.sql` | Enlaza con las listas de Control de baños |
+| 1 | `supabase/migrations/20261017000300_padron_control_banos.sql` | Enlaza con las listas de clase de «Acceso a Microsoft 365» |
 | 2 | `supabase/migrations/20261017000400_medidas_por_curso.sql` | Medidas con casillas por curso; quita el curso 2025-26 vacío |
 | 3 | `supabase/migrations/20261017000500_enlaces_sharepoint.sql` | Enlaces a expedientes y carpetas de SharePoint |
 | 4 | `privado/importacion_2026-27.sql` | Perfiles y las 55 fichas del listado actual, con histórico y medidas |
@@ -38,4 +38,4 @@ Sube el contenido de «Para subir a GitHub» al repositorio. Vercel publica solo
 | Orientación académica y profesional | En preparación |
 | Plantillas | Seguimiento de medidas, derivación, autorizaciones e información a familias |
 | Recursos | Guías (TDAH, dislexia, exámenes, emociones…), legibles dentro del portal o en SharePoint |
-| Administración (Orientación) | Perfiles, cursos, tutores, sincronización con Control de baños |
+| Administración (Orientación) | Perfiles, cursos, tutores, sincronización con «Acceso a Microsoft 365» |

@@ -10,6 +10,7 @@ type AlumnoCompleto = {
   expediente_url: string | null;
   carpeta_medidas_url: string | null;
 };
+export type MateriaPendiente = { nivel: string; materia: string; profesor: string | null };
 type Matricula = { curso_academico_id: number; grupo_id: string; repetidor: boolean; materias_pendientes: string | null };
 
 // Todo lo que muestra la ficha de un alumno/a, para el curso pedido (o el más reciente).
@@ -35,13 +36,16 @@ export async function cargarAlumno(id: string, cursoParam?: string) {
   const ficha = fichas?.find((f) => f.curso_academico_id === curso?.id) ?? null;
   const matricula = matriculas?.find((m) => m.curso_academico_id === curso?.id) ?? null;
 
-  const [{ data: grupo }, { data: marcadas }, { data: puedeFicha }, { data: puedeAlumno }] = await Promise.all([
+  const [{ data: grupo }, { data: marcadas }, { data: puedeFicha }, { data: puedeAlumno }, { data: pendientes }] = await Promise.all([
     matricula
       ? supabase.from("grupo").select("id, letra, curso_academico_id, nivel:nivel_id(nombre, orden), tutor:tutor_id(nombre, email)").eq("id", matricula.grupo_id).returns<Grupo[]>().maybeSingle()
       : Promise.resolve({ data: null }),
     ficha ? supabase.from("medida_alumno").select("medida_id").eq("ficha_id", ficha.id).is("evaluacion", null) : Promise.resolve({ data: [] }),
     ficha ? supabase.rpc("puede_editar_ficha", { p_ficha: ficha.id }) : Promise.resolve({ data: false }),
     supabase.rpc("puede_editar_alumno", { p_alumno: id }),
+    ficha
+      ? supabase.from("materia_pendiente").select("nivel, materia, profesor").eq("ficha_id", ficha.id).order("orden").returns<MateriaPendiente[]>()
+      : Promise.resolve({ data: [] as MateriaPendiente[] }),
   ]);
 
   const idsMarcadas = new Set((marcadas ?? []).map((m: { medida_id: number }) => m.medida_id));
@@ -54,6 +58,7 @@ export async function cargarAlumno(id: string, cursoParam?: string) {
     matricula,
     grupo: grupo as Grupo | null,
     historial: historial ?? [],
+    pendientes: pendientes ?? [],
     catalogo: catalogo as Medida[],
     medidas: (catalogo as Medida[]).filter((m) => idsMarcadas.has(m.id)),
     idsMarcadas,

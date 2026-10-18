@@ -27,7 +27,7 @@ export function Svg({ i }: { i: keyof typeof Icono }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true">{Icono[i]}</svg>;
 }
 
-// Presentación de la portada: qué es el portal y qué puede hacer cada perfil (como en Horarios y Control de baños).
+// Presentación de la portada: qué es el portal y qué puede hacer cada perfil (como en las demás webs del colegio).
 function Presentacion() {
   return (
     <section className="presenta">
@@ -65,7 +65,7 @@ function Presentacion() {
           <summary><Svg i="candado" /><span>Orientación <em className="aviso-etq">Solo cuentas autorizadas</em> <small>Acceso: Microsoft 365 (@salesianas.org)</small></span></summary>
           <ul>
             <li><b>Edición completa:</b> todas las fichas, de cualquier curso.</li>
-            <li><b>Administración:</b> perfiles, tutores, cursos y sincronización con Control de baños.</li>
+            <li><b>Administración:</b> perfiles, tutores, cursos y sincronización con «Acceso a Microsoft 365».</li>
           </ul>
         </details>
       </div>

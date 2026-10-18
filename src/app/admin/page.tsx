@@ -2,6 +2,7 @@ import Link from "next/link";
 import { activarCurso, asignarTutor, borrarPersona, guardarPersona, sincronizar } from "@/app/acciones";
 import { Chip, Marco } from "@/components/Marco";
 import { nombreGrupo, type CursoAcademico, type Grupo } from "@/lib/datos";
+import { listarCarpeta, sharepointConfigurado } from "@/lib/sharepoint";
 import { createClient, obtenerPerfil } from "@/lib/supabase/server";
 
 type Persona = { id: string; email: string; nombre: string; nombre_seneca: string | null; rol: "orientacion" | "docente"; activo: boolean };
@@ -30,6 +31,7 @@ export default async function Administracion({
     supabase.from("curso_academico").select("id, nombre, activo").order("nombre", { ascending: false }).returns<CursoAcademico[]>(),
   ]);
   const activo = cursos?.find((c) => c.activo);
+  const sharepoint = !sharepointConfigurado() ? "sin" : (await listarCarpeta("Recursos")) ? "ok" : "error";
 
   return (
     <Marco perfil={perfil} curso={activo?.nombre} pestana="admin" migas={<>Administración › <b>{SECCIONES[seccion]}</b></>}>
@@ -42,6 +44,12 @@ export default async function Administracion({
       {sin && <div className="aviso">Sin grupo en el curso activo (bajas, cambio de etapa o nombre distinto en Séneca): {sin}</div>}
       {error && <div className="aviso error">{error}</div>}
 
+      <div className={`aviso ${sharepoint === "ok" ? "info" : sharepoint === "error" ? "error" : ""}`}>
+        <b>SharePoint en directo:</b>{" "}
+        {sharepoint === "ok" && "conectado. Recursos, Plantillas, Proceso de derivación y las plantillas del documento de seguimiento se leen de SharePoint (los cambios se ven en unos 5 minutos)."}
+        {sharepoint === "sin" && "sin configurar. La web usa sus listas fijas. Pasos en docs/guia-sharepoint-en-directo.md."}
+        {sharepoint === "error" && "configurado, pero Microsoft no da acceso. Revisa los permisos y el secreto (docs/guia-sharepoint-en-directo.md)."}
+      </div>
       {seccion === "perfiles" ? <Perfiles personal={personal ?? []} miEmail={perfil.email} /> : <Cursos cursos={cursos ?? []} personal={personal ?? []} />}
     </Marco>
   );
@@ -128,9 +136,9 @@ async function Cursos({ cursos, personal }: { cursos: CursoAcademico[]; personal
   return (
     <>
       <section className="panel">
-        <h2 className="verde">Sincronizar con Control de baños</h2>
+        <h2 className="verde">Sincronizar con «Acceso a Microsoft 365»</h2>
         <p className="sub">
-          Las listas de clase se mantienen en Control de baños (Administración → curso nuevo con los PDF de Séneca). Al sincronizar, Orientación toma su
+          Las listas de clase son las comunes de la base de datos «Acceso a Microsoft 365», la que comparten todas las webs del colegio (se cargan con los PDF de Séneca). Al sincronizar, Orientación toma su
           <b> curso activo</b>: lo crea aquí y lo marca como activo, crea los grupos de ESO, asigna cada tutoría por el nombre en Séneca y coloca en su
           grupo al alumnado en seguimiento. Se puede repetir sin duplicar nada. Hazlo cada septiembre y tras cambios de lista.
         </p>

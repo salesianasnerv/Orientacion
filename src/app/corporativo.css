@@ -44,7 +44,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 [hidden] { display: none !important; }
 a { color: var(--azul); }
 
-/* Cabecera (logo | título) y, debajo, el menú fijo: igual que Control de baños y Biblioteca */
+/* Cabecera (logo | título) y, debajo, el menú fijo: igual que las demás webs del colegio */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
   padding: 10px 16px; background: var(--panel); border-bottom: 2px solid #009abb; }
 .marca { display: flex; align-items: center; gap: 14px; min-width: 0; color: inherit; text-decoration: none; }
@@ -83,7 +83,7 @@ main { width: 100%; max-width: 1280px; margin: 0 auto; padding: 16px 16px 48px; 
 .eyebrow { display: inline-block; background: var(--azul-bg); color: var(--azul); font-weight: 700; font-size: .78rem;
   letter-spacing: .06em; text-transform: uppercase; padding: .3rem .8rem; border-radius: 999px; margin-bottom: .9rem; }
 
-/* Acceso (tarjeta centrada, como en Control de baños) */
+/* Acceso (tarjeta centrada, como en las demás webs del colegio) */
 .login { display: grid; place-items: center; min-height: 70vh; }
 .tarjeta { background: var(--panel); border: 1px solid var(--borde); border-radius: 16px; padding: 36px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: var(--sombra); }
 .tarjeta .logo { height: 58px; width: auto; display: block; margin: 0 auto 1.1rem; }

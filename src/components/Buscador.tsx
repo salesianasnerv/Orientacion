@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { BLOQUES, TIPOS_NEAE, type Medida } from "@/lib/datos";
+import { BLOQUES, GRUPOS_DE_BLOQUES, TIPOS_NEAE, type Medida } from "@/lib/datos";
 import type { FilaAlumno } from "@/lib/consultas";
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -27,7 +27,7 @@ export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; med
       if (seneca === "censado" && f.censado !== true) return false;
       if (seneca === "sin" && f.censado !== false) return false;
       if (seneca === "dictamen" && !f.dictamen) return false;
-      if (medida.startsWith("b:") ? !f.medidas.some((id) => medidaDe.get(id)?.bloque === medida.slice(2)) : medida && !f.medidas.includes(Number(medida))) return false;
+      if (!cumpleMedida(f.medidas, medida, medidaDe)) return false;
       return true;
     });
   }, [filas, texto, grupo, tipo, seneca, medida, medidaDe]);
@@ -73,17 +73,7 @@ export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; med
         </label>
         <label className="campo ancho-2">
           Medida
-          <select value={medida} onChange={(e) => setMedida(e.target.value)}>
-            <option value="">Todas</option>
-            {BLOQUES.map((b) => (
-              <optgroup key={b.clave} label={b.titulo}>
-                <option value={`b:${b.clave}`}>Cualquiera de {b.titulo.toLowerCase()}</option>
-                {medidas.filter((m) => m.bloque === b.clave).map((m) => (
-                  <option key={m.id} value={m.id}>{m.codigo ? `${m.codigo} · ` : ""}{m.nombre}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+          <SelectorMedida value={medida} onChange={setMedida} medidas={medidas} />
         </label>
       </div>
 
@@ -98,7 +88,7 @@ export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; med
         <div className="tabla-wrap">
           <table className="datos tabla-bd">
             <thead>
-              <tr><th>Alumno/a</th><th>Grupo</th><th>NEAE</th><th>Séneca</th><th>Medidas</th><th>Diagnóstico</th></tr>
+              <tr><th>Alumno/a</th><th>Grupo</th><th>NEAE</th><th>Séneca</th><th>Medidas generales</th><th>Medidas específicas</th><th>Diagnóstico</th></tr>
             </thead>
             <tbody>
               {visibles.map((f) => (
@@ -107,7 +97,9 @@ export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; med
                   <td className="nowrap">{f.grupo}</td>
                   <td>{f.tipo ? <span className="chip verde" title={TIPOS_NEAE[f.tipo]}>{f.tipo}</span> : <span className="muted">—</span>}{f.dictamen && <span className="chip morado" style={{ marginLeft: 4 }}>Dict.</span>}</td>
                   <td>{f.censado === null ? <span className="chip">Sin ficha</span> : f.censado ? <span className="chip azul">Censado</span> : <span className="chip naranja">Sin censar</span>}</td>
-                  <td><ResumenMedidas ids={f.medidas} medidaDe={medidaDe} /></td>
+                  {GRUPOS_DE_BLOQUES.map((g, i) => (
+                    <td key={g.titulo} className="celda-medidas"><MedidasPlegables ids={f.medidas} medidaDe={medidaDe} bloques={g.bloques} especificas={i === 1} /></td>
+                  ))}
                   <td className="muted small diag">{f.diagnostico?.split("\n").filter(Boolean).slice(0, 2).join(" · ")}</td>
                 </tr>
               ))}
@@ -119,16 +111,48 @@ export function Buscador({ filas, medidas, cursoId }: { filas: FilaAlumno[]; med
   );
 }
 
-// Códigos (AP2, PT/PE, PF…) y, para las medidas sin código, cuántas hay de cada bloque (MET ×3)
-function ResumenMedidas({ ids, medidaDe }: { ids: number[]; medidaDe: Map<number, Medida> }) {
-  if (!ids.length) return <span className="muted">—</span>;
-  const lista = ids.map((id) => medidaDe.get(id)).filter((m): m is Medida => !!m);
-  const codigos = lista.filter((m) => m.codigo).sort((a, b) => a.bloque.localeCompare(b.bloque));
-  const sinCodigo = BLOQUES.map((b) => ({ b, n: lista.filter((m) => !m.codigo && m.bloque === b.clave).length })).filter((x) => x.n);
+// Filtro por medida: "" = todas, "b:<bloque>" = cualquiera del bloque, "<id>" = esa medida
+export function cumpleMedida(ids: number[], filtro: string, medidaDe: Map<number, Medida>) {
+  if (!filtro) return true;
+  if (filtro.startsWith("b:")) return ids.some((id) => medidaDe.get(id)?.bloque === filtro.slice(2));
+  return ids.includes(Number(filtro));
+}
+
+export function SelectorMedida({ value, onChange, medidas }: { value: string; onChange: (v: string) => void; medidas: Medida[] }) {
   return (
-    <div className="chips">
-      {codigos.map((m) => <span key={m.id} className={`chip ${m.bloque === "especifica" || m.bloque === "programa" ? "naranja" : "azul"}`} title={m.nombre}>{m.codigo}</span>)}
-      {sinCodigo.map(({ b, n }) => <span key={b.clave} className="chip" title={b.titulo}>{b.abrev} ×{n}</span>)}
-    </div>
+    <select value={value} onChange={(e) => onChange(e.target.value)}>
+      <option value="">Todas</option>
+      {BLOQUES.map((b) => (
+        <optgroup key={b.clave} label={b.titulo}>
+          <option value={`b:${b.clave}`}>Cualquiera de {b.titulo.toLowerCase()}</option>
+          {medidas.filter((m) => m.bloque === b.clave).map((m) => (
+            <option key={m.id} value={m.id}>{m.codigo ? `${m.codigo} · ` : ""}{m.nombre}</option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
+// Recuento de medidas de un grupo (generales o específicas); al pulsar se despliega la lista por bloques
+export function MedidasPlegables({ ids, medidaDe, bloques, especificas }: { ids: number[]; medidaDe: Map<number, Medida>; bloques: Medida["bloque"][]; especificas: boolean }) {
+  const lista = ids.map((id) => medidaDe.get(id)).filter((m): m is Medida => !!m && bloques.includes(m.bloque));
+  if (!lista.length) return <span className="muted">—</span>;
+  const porBloque = BLOQUES.filter((b) => bloques.includes(b.clave))
+    .map((b) => ({ b, ms: lista.filter((m) => m.bloque === b.clave).sort((x, y) => x.orden - y.orden) }))
+    .filter((x) => x.ms.length);
+  return (
+    <details className="mini-plegable">
+      <summary>
+        <span className={`chip ${especificas ? "naranja" : "azul"}`}>{lista.length} {lista.length === 1 ? "medida" : "medidas"}</span>
+        <span className="flechita" />
+      </summary>
+      {porBloque.map(({ b, ms }) => (
+        <div key={b.clave} className="bloque-lista">
+          {porBloque.length > 1 && <div className="bloque-titulo">{b.titulo}</div>}
+          <ul>{ms.map((m) => <li key={m.id}>{m.codigo && <strong>{m.codigo} · </strong>}{m.nombre}</li>)}</ul>
+        </div>
+      ))}
+    </details>
   );
 }

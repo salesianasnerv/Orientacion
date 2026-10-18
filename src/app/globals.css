@@ -70,6 +70,14 @@ details.notas summary { cursor: pointer; font-weight: 600; color: var(--suave); 
 .enlace-fila:hover { text-decoration: underline; }
 .nowrap { white-space: nowrap; }
 .diag { max-width: 340px; }
+.celda-medidas { min-width: 130px; max-width: 320px; }
+details.mini-plegable > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+details.mini-plegable > summary::-webkit-details-marker { display: none; }
+details.mini-plegable .flechita { width: 7px; height: 7px; border-right: 2px solid var(--suave); border-bottom: 2px solid var(--suave); transform: rotate(45deg); transition: transform .15s; }
+details.mini-plegable[open] .flechita { transform: rotate(-135deg); }
+details.mini-plegable ul { margin: 6px 0 0; padding-left: 18px; font-size: .85rem; }
+details.mini-plegable li { margin: 2px 0; }
+.bloque-lista .bloque-titulo { margin-top: 8px; font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--suave); }
 
 /* Casillas de medidas (editar ficha) */
 .casillas-medidas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px 16px; margin: 6px 0 12px; }
@@ -92,3 +100,65 @@ details.grupo-medidas h3 { margin-top: 6px; }
 .fila-botones { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .casillas { display: flex; flex-wrap: wrap; gap: 16px; }
 .casillas label { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+
+/* Evaluación de las medidas (1ª, 2ª y ordinaria) en tres columnas */
+.evals-medidas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 700px) { .evals-medidas { grid-template-columns: 1fr; } }
+
+/* Documento de seguimiento: vista previa del Word y PDF (impresión solo de las hojas) */
+.vista-docx { overflow-x: auto; border-radius: 12px; }
+.vista-docx .docx-wrapper { border-radius: 12px; }
+@media print {
+  body * { visibility: hidden; }
+  .vista-docx, .vista-docx * { visibility: visible; }
+  .vista-docx { position: absolute; inset: 0 auto auto 0; overflow: visible; }
+  .vista-docx .docx-wrapper { background: none !important; padding: 0 !important; }
+  .vista-docx section.docx { box-shadow: none !important; margin: 0 !important; break-after: page; }
+  .no-imprimir { display: none !important; }
+}
+
+/* Materias pendientes (editar ficha) */
+.pendientes { display: grid; gap: 8px; }
+.fila-pendiente { display: grid; grid-template-columns: 110px 1fr 1fr auto; gap: 10px; align-items: end; }
+.fila-pendiente select { width: 100%; }
+@media (max-width: 700px) { .fila-pendiente { grid-template-columns: 1fr; } }
+
+/* Proceso de derivación: infografía de pasos y explicación */
+.ruta { --c: var(--azul); --c-bg: var(--azul-bg); --c-texto: var(--azul); margin-bottom: 14px; }
+.ruta-verde { --c: var(--verde); --c-bg: var(--verde-bg); --c-texto: var(--verde-oscuro); }
+.ruta-titulo { display: inline-block; font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; color: #fff; background: var(--c); padding: 4px 12px; border-radius: 999px; margin-bottom: 10px; }
+.ruta-pasos { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 18px; }
+.ruta-pasos li { position: relative; }
+.ruta-pasos li:not(:last-child)::after { content: ""; position: absolute; top: 22px; right: -15px; width: 12px; height: 12px; border-top: 3px solid var(--c); border-right: 3px solid var(--c); transform: rotate(45deg); }
+.ruta-pasos a { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; height: 100%; padding: 10px 6px 12px; border-radius: 12px; background: var(--c-bg); color: var(--texto); text-decoration: none; transition: transform .12s; }
+.ruta-pasos a:hover { transform: translateY(-2px); box-shadow: var(--sombra); }
+.ruta-num { width: 30px; height: 30px; border-radius: 50%; background: var(--c); color: #fff; font-weight: 700; display: grid; place-items: center; }
+.ruta-corto { font-weight: 700; font-size: .88rem; line-height: 1.2; }
+.ruta-quien { font-size: .74rem; color: var(--suave); line-height: 1.2; }
+.ruta-docs { margin-top: auto; font-size: .72rem; font-weight: 700; color: var(--c-texto); }
+@media (max-width: 900px) {
+  .ruta-pasos { grid-auto-flow: row; grid-template-columns: 1fr; gap: 14px; }
+  .ruta-pasos li:not(:last-child)::after { top: auto; bottom: -13px; right: 50%; transform: translateX(50%) rotate(135deg); width: 9px; height: 9px; }
+  .ruta-pasos a { flex-direction: row; flex-wrap: wrap; text-align: left; gap: 4px 10px; }
+  .ruta-docs { margin: 0 0 0 auto; }
+}
+
+.pasos { display: grid; gap: 12px; }
+.paso { --c: var(--azul); --c-bg: var(--azul-bg); display: grid; grid-template-columns: 52px 1fr; gap: 14px; padding: 14px; border: 1px solid var(--borde); border-left: 5px solid var(--c); border-radius: 12px; scroll-margin-top: 90px; }
+.paso-verde { --c: var(--verde); --c-bg: var(--verde-bg); }
+.paso:target { box-shadow: 0 0 0 3px var(--c-bg); }
+.paso-num { width: 46px; height: 46px; border-radius: 50%; background: var(--c); color: #fff; font-weight: 700; font-size: 1.05rem; display: grid; place-items: center; }
+.paso h3 { margin: 2px 0 2px; }
+.paso p { margin: 8px 0 0; line-height: 1.55; }
+.paso-quien { font-size: .8rem; font-weight: 600; color: var(--suave); text-transform: uppercase; letter-spacing: .03em; }
+.paso-nota { margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: var(--naranja-bg); font-size: .92rem; line-height: 1.5; }
+.paso-docs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.doc-paso { display: inline-flex; align-items: center; border: 1px solid var(--borde); border-radius: 10px; background: var(--panel); overflow: hidden; }
+.doc-paso > a:first-child { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; color: var(--texto); text-decoration: none; font-size: .9rem; font-weight: 600; }
+.doc-paso > a:first-child:hover { color: var(--azul); }
+.doc-paso .doc-num { min-width: 26px; padding: 1px 6px; border-radius: 6px; background: var(--azul-bg); color: var(--azul); text-align: center; font-size: .8rem; }
+.doc-paso .leer { align-self: stretch; display: grid; place-items: center; padding: 0 10px; border-left: 1px solid var(--borde); font-size: .82rem; font-weight: 700; text-decoration: none; background: var(--azul-bg); }
+@media (max-width: 600px) { .paso { grid-template-columns: 1fr; } .paso-num { width: 38px; height: 38px; } }
+
+.panel.importante ul { margin: 0; padding-left: 20px; line-height: 1.6; }
+.panel.importante li + li { margin-top: 6px; }

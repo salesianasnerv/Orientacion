@@ -4,7 +4,7 @@ Fichas del alumnado, medidas de atención a la diversidad y seguimiento. Etapa i
 
 - Diseño: `Plataforma Orientación - Diseño.md` (carpeta de Orientación en OneDrive)
 - Fase 1 (grupos, fichas, administración): [docs/puesta-en-marcha-fase-1.md](docs/puesta-en-marcha-fase-1.md)
-- Puesta en marcha: [docs/guia-entra-id-y-supabase.md](docs/guia-entra-id-y-supabase.md) — usa el mismo proyecto de Supabase (y el mismo acceso Microsoft 365) que Control de baños
+- Puesta en marcha: [docs/guia-entra-id-y-supabase.md](docs/guia-entra-id-y-supabase.md) — usa el proyecto de Supabase y la app de Entra ID «Acceso a Microsoft 365», comunes a todas las webs del colegio
 
 ## Estructura
 
@@ -15,7 +15,7 @@ Fichas del alumnado, medidas de atención a la diversidad y seguimiento. Etapa i
 | `src/app/login` | Acceso con Microsoft 365 |
 | `src/app/auth/` | Retorno de Microsoft y cierre de sesión |
 | `src/app/grupo`, `src/app/alumno` | Grupos, fichas e histórico |
-| `src/app/admin` | Perfiles, cursos, tutores y sincronización con Control de baños |
+| `src/app/admin` | Perfiles, cursos, tutores y sincronización con «Acceso a Microsoft 365» |
 | `src/app/corporativo.css` | Hoja corporativa común (copiada de Horarios); lo propio va en `globals.css` |
 | `privado/` | Importaciones con datos del alumnado (no se sube a git) |
 

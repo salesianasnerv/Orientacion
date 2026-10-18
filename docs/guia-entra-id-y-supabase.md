@@ -1,11 +1,11 @@
 # Guía fase 0 · Puesta en marcha
 
-Tiempo estimado: 10 min. La plataforma usa **el mismo proyecto de Supabase que Control de baños** (`hblayjaknhfxieqbzrlq`). El acceso con Microsoft 365 ya está configurado ahí, así que **no hay que tocar Entra ID**.
+Tiempo estimado: 10 min. La plataforma usa el proyecto de Supabase **«Acceso a Microsoft 365»** (`hblayjaknhfxieqbzrlq`), común a todas las webs del colegio que entran con Microsoft 365 (Horarios, Control de baños, Orientación, PAC…). El inicio de sesión ya está configurado ahí con la app de Entra ID del mismo nombre, así que **no hay que tocar Entra ID**.
 
-## Convivencia con Control de baños
+## Convivencia con las demás webs
 
-- Tablas distintas (`alumno`, `curso_academico`… frente a `alumnos`, `cursos`…): no se pisan.
-- Los permisos de cada app son independientes: ser administrador/a en Control de baños no da permisos en Orientación, y al revés.
+- Cada web tiene sus tablas (`alumno`, `curso_academico`… de Orientación frente a las listas comunes `alumnos`, `cursos`…): no se pisan.
+- Los permisos de cada app son independientes: ser administrador/a en otra web no da permisos en Orientación, y al revés.
 - Solo entran cuentas **@salesianas.org** que inicien sesión con Microsoft (tabla `configuracion`, clave `dominios_permitidos`).
 
 ## 1. Crear las tablas
@@ -27,12 +27,12 @@ Supabase → **Authentication → URL Configuration → Redirect URLs** → *Add
 - `http://localhost:3000/**` (para probar en tu ordenador)
 - Cuando la publiquemos, también su dirección (p. ej. `https://orientacion-xxx.vercel.app/**`).
 
-**No cambies la *Site URL***: es la de Control de baños.
+**No cambies la *Site URL***: la comparten todas las webs.
 
 ## 3. Conectar la web
 
 1. En la carpeta del proyecto, copia `.env.example` como `.env.local`.
-2. Rellena los mismos datos que tiene Control de baños en su `config.js`:
+2. Rellena los datos del proyecto «Acceso a Microsoft 365» (Supabase → Project Settings → API):
 
        NEXT_PUBLIC_SUPABASE_URL=https://hblayjaknhfxieqbzrlq.supabase.co
        NEXT_PUBLIC_SUPABASE_ANON_KEY=(el valor de supabaseAnonKey)
@@ -47,7 +47,7 @@ Supabase → **Authentication → URL Configuration → Redirect URLs** → *Add
 
 | Síntoma | Causa |
 |---|---|
-| Tras iniciar sesión acabas en Control de baños | Falta `http://localhost:3000/**` en Redirect URLs (paso 2) |
+| Tras iniciar sesión acabas en otra web del colegio | Falta `http://localhost:3000/**` en Redirect URLs (paso 2) |
 | Vuelve a `/login?error=1` | Lo mismo, o la clave `anon` está mal copiada |
 | «Acceso no autorizado» | La cuenta no es @salesianas.org |
 | Perfil *Consulta* siendo tú de Orientación | El email del paso 1.4 no coincide con el de tu cuenta |
@@ -55,4 +55,4 @@ Supabase → **Authentication → URL Configuration → Redirect URLs** → *Add
 
 ## Más adelante (fase 4: expedientes de SharePoint)
 
-Para leer las carpetas de SharePoint habrá que añadir permisos de Microsoft Graph (`Files.Read.All`) al registro de Entra ID que ya usáis. Como ese registro lo comparten todas las utilidades, valoraremos entonces si conviene un registro propio para Orientación.
+Para leer las carpetas de SharePoint en directo: [guia-sharepoint-en-directo.md](guia-sharepoint-en-directo.md).

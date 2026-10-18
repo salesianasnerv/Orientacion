@@ -4,8 +4,12 @@
 const BASE = "/sites/E-NER/Claustro/ESO/Documentos compartidos/06 - Orientación";
 const VISTA = "https://salesianas.sharepoint.com/sites/E-NER/Claustro/ESO/Documentos%20compartidos/Forms/AllItems.aspx";
 
+// Carpetas subidas desde el Mac: SharePoint guarda sus tildes descompuestas (o + ´) y el visor solo abre el nombre exacto
+const CARPETAS_NFD = ["Proceso Derivación Secundaria/", "Plantillas/", "Recursos/"];
+
 export function urlSharePoint(ruta: string) {
-  const completa = `${BASE}/${ruta}`;
+  const exacta = CARPETAS_NFD.some((c) => ruta.startsWith(c)) ? ruta.normalize("NFD") : ruta;
+  const completa = `${BASE}/${exacta}`;
   const carpeta = completa.slice(0, completa.lastIndexOf("/"));
   const esCarpeta = !/\.\w{3,4}$/.test(ruta);
   return esCarpeta
@@ -18,6 +22,7 @@ export type Documento = {
   ruta: string; // relativa a «06 - Orientación»
   slug?: string; // si se puede leer en la web
   nota?: string;
+  versiones?: { ext: string; url: string }[]; // enlaces leídos en directo de SharePoint (Word, PDF…)
 };
 
 export type Apartado = { titulo: string; descripcion?: string; documentos: Documento[] };
@@ -42,30 +47,30 @@ export const DERIVACION: Apartado[] = [
 
 export const PLANTILLAS: Apartado[] = [
   {
-    titulo: "Seguimiento de medidas",
-    descripcion: "Según el alumno/a esté censado o no en Séneca.",
+    titulo: "Registro y seguimiento de medidas",
+    descripcion: "Según el alumno/a esté censado o no en Séneca. Desde la ficha de cada alumno/a se generan ya rellenas.",
     documentos: [
-      { titulo: "Alumnado censado (seguimiento por evaluación)", ruta: "Plantillas/Alumnado censado.docx" },
-      { titulo: "Alumnado sin censar (registro de medidas generales)", ruta: "Plantillas/Alumnado sin censar.docx" },
-      { titulo: "1. Medidas generales", ruta: "Proceso Derivación Secundaria/1. Medidas generales.docx" },
-      { titulo: "4. Seguimiento alumnado", ruta: "Proceso Derivación Secundaria/4. Seguimiento alumnado.docx" },
+      { titulo: "Alumnado censado", ruta: "Plantillas/Atención a la Diversidad/Registro y seguimiento - Alumnado censado.docx" },
+      { titulo: "Alumnado sin censar", ruta: "Plantillas/Atención a la Diversidad/Registro y seguimiento - Alumnado sin censar.docx" },
     ],
   },
   {
-    titulo: "Derivación y equipo docente",
-    documentos: [
-      { titulo: "2. Detección de indicios de NEAE", ruta: "Proceso Derivación Secundaria/2. Detección indicios NEAE.pdf" },
-      { titulo: "3. Acta del equipo docente", ruta: "Proceso Derivación Secundaria/3. Acta Equipo Docente.pdf" },
-    ],
-  },
-  {
-    titulo: "Familias: autorizaciones e información",
+    titulo: "Derivación",
     descripcion: "El colegio se queda el original; la familia, una copia.",
     documentos: [
-      { titulo: "5. Información a la familia e inicio de la evaluación psicopedagógica (autorización)", ruta: "Proceso Derivación Secundaria/5. Información padres inicio Evaluación.pdf" },
-      { titulo: "6. Información del contenido del informe", ruta: "Proceso Derivación Secundaria/6. Información Contenido Informe.pdf" },
-      { titulo: "7. Recibí copia", ruta: "Proceso Derivación Secundaria/7. Recibí copia.pdf" },
-      { titulo: "8. Acta de retirada de medidas", ruta: "Proceso Derivación Secundaria/8. Acta Retirada de Medidas.docx" },
+      { titulo: "Detección de indicios de NEAE", ruta: "Plantillas/Proceso de derivación/2. Detección indicios NEAE.pdf" },
+      { titulo: "Acta del equipo docente", ruta: "Plantillas/Proceso de derivación/3. Acta Equipo Docente.pdf" },
+      { titulo: "Información a padres | Inicio de la evaluación", ruta: "Plantillas/Proceso de derivación/5. Información padres inicio Evaluación.pdf" },
+      { titulo: "Información a padres | Contenido del informe", ruta: "Plantillas/Proceso de derivación/6. Información Contenido Informe.pdf" },
+      { titulo: "Información a padres | Recibí informe", ruta: "Plantillas/Proceso de derivación/7. Recibí copia.pdf" },
+      { titulo: "Acta de retirada de medidas", ruta: "Plantillas/Proceso de derivación/8. Acta Retirada de Medidas.docx" },
+    ],
+  },
+  {
+    titulo: "Autorizaciones",
+    documentos: [
+      { titulo: "Autorización a entidad externa", ruta: "Plantillas/Autorizaciones/Autorización Entidad Externa.docx" },
+      { titulo: "Autorización de entrevista personal", ruta: "Plantillas/Autorizaciones/Autorización entrevista.docx" },
     ],
   },
 ];
@@ -97,16 +102,16 @@ export const RECURSOS: Apartado[] = [
   {
     titulo: "TDAH",
     documentos: [
-      { titulo: "Medidas generales TDAH", ruta: "Recursos/Medidas generales TDAH.pdf", slug: "medidas-generales-tdah" },
-      { titulo: "Pautas TDAH (orientaciones para el profesorado)", ruta: "Recursos/Pautas TDAH.pdf", slug: "pautas-tdah" },
+      { titulo: "Medidas generales TDAH", ruta: "Recursos/Medidas generales TDAH.pdf" },
+      { titulo: "Pautas TDAH (orientaciones para el profesorado)", ruta: "Recursos/Pautas TDAH.pdf" },
       { titulo: "TDAH: orientaciones prácticas", ruta: "Recursos/TDAH Orientaciones prácticas.pdf" },
     ],
   },
   {
     titulo: "Aprendizaje y evaluación",
     documentos: [
-      { titulo: "Cómo adaptar los exámenes", ruta: "Recursos/Como adaptar los examenes.pdf", slug: "adaptar-examenes" },
-      { titulo: "Indicadores de dislexia", ruta: "Recursos/INDICADORES DE DISLEXIA.pdf", slug: "indicadores-dislexia" },
+      { titulo: "Cómo adaptar los exámenes", ruta: "Recursos/Como adaptar los examenes.pdf" },
+      { titulo: "Indicadores de dislexia", ruta: "Recursos/INDICADORES DE DISLEXIA.pdf" },
       { titulo: "Fortalecer la memoria", ruta: "Recursos/Fortalecer la memoria.pdf" },
       { titulo: "Adaptaciones NEAE: 17 tipologías", ruta: "Recursos/ADAPTACIONES NEAE 17 TIPOLOGÍAS.pdf", nota: "114 páginas" },
     ],
@@ -114,8 +119,8 @@ export const RECURSOS: Apartado[] = [
   {
     titulo: "Convivencia, emociones y salud mental",
     documentos: [
-      { titulo: "Pautas: normas claras", ruta: "Recursos/Pautas normas claras.pdf", slug: "pautas-normas-claras" },
-      { titulo: "Emociones (guía del alumnado)", ruta: "Recursos/Emociones.pdf", slug: "emociones" },
+      { titulo: "Pautas: normas claras", ruta: "Recursos/Pautas normas claras.pdf" },
+      { titulo: "Emociones (guía del alumnado)", ruta: "Recursos/Emociones.pdf" },
       { titulo: "Asperger: orientaciones prácticas", ruta: "Recursos/ASPERGER Orientaciones Prácticas.pdf" },
       { titulo: "Salud mental", ruta: "Recursos/SALUD MENTAL.pdf" },
     ],

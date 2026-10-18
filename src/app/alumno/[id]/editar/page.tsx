@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { borrarEntradaHistorial, guardarEntradaHistorial, guardarFicha } from "@/app/acciones";
 import { Marco } from "@/components/Marco";
-import { BLOQUES, GRUPOS_DE_BLOQUES, nombreCompleto, nombreGrupo, TIPOS_NEAE } from "@/lib/datos";
+import { BLOQUES, EVALUACIONES_MEDIDAS, GRUPOS_DE_BLOQUES, nombreCompleto, nombreGrupo, TIPOS_NEAE } from "@/lib/datos";
 import { obtenerPerfil } from "@/lib/supabase/server";
+import { opcionesPendientes } from "@/lib/horarios";
 import { cargarAlumno } from "../cargar";
+import { Pendientes } from "./Pendientes";
 
 export default async function EditarAlumno({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ curso?: string }> }) {
   const [{ id }, { curso: cursoParam }] = await Promise.all([params, searchParams]);
@@ -13,8 +15,9 @@ export default async function EditarAlumno({ params, searchParams }: { params: P
 
   const d = await cargarAlumno(id, cursoParam);
   if (!d) notFound();
-  const { alumno, curso, ficha, grupo, historial, catalogo, idsMarcadas } = d;
+  const { alumno, curso, ficha, grupo, matricula, historial, catalogo, idsMarcadas, pendientes } = d;
   if (!ficha || !d.puedeEditar) redirect(`/alumno/${id}?curso=${curso?.id ?? ""}`);
+  const opciones = await opcionesPendientes(curso?.nombre, grupo?.nivel ?? null);
   const volver = `/alumno/${id}?curso=${curso?.id}`;
   const etiquetaCurso = `Curso ${curso?.nombre ?? ""}${grupo ? ` (${grupo.nivel?.nombre ?? ""})` : ""}`;
 
@@ -45,12 +48,19 @@ export default async function EditarAlumno({ params, searchParams }: { params: P
             <div className="casillas" style={{ alignItems: "flex-end" }}>
               <label><input type="checkbox" name="censado" defaultChecked={ficha.censado} /> Censado en Séneca</label>
               <label><input type="checkbox" name="dictamen" defaultChecked={ficha.dictamen} /> Dictamen</label>
+              <label><input type="checkbox" name="repetidor" defaultChecked={!!matricula?.repetidor} /> Repetidor/a</label>
             </div>
           </div>
           <label className="campo">
             Diagnóstico
             <textarea name="diagnostico" defaultValue={ficha.diagnostico ?? ""} rows={3} />
           </label>
+        </section>
+
+        <section className="panel">
+          <h2>Materias pendientes · Programa de refuerzo</h2>
+          <p className="sub">Materias suspensas de cursos anteriores y profesor/a que hace su seguimiento. Las listas salen de la web de Horarios.</p>
+          <Pendientes opciones={opciones} iniciales={pendientes.map((p) => ({ nivel: p.nivel, materia: p.materia, profesor: p.profesor ?? "" }))} />
         </section>
 
         <section className="panel">
@@ -76,10 +86,20 @@ export default async function EditarAlumno({ params, searchParams }: { params: P
               </div>
             </details>
           ))}
+          <h3>Notas y concreción de las medidas</h3>
           <label className="campo">
-            Notas y concreción de las medidas
+            Aspectos a tener en cuenta
             <textarea name="propuesta_medidas" defaultValue={ficha.propuesta_medidas ?? ""} rows={4} placeholder="Áreas, condiciones, «Otros»…" />
           </label>
+          <div className="campo">Evaluación de las medidas</div>
+          <div className="form-grid evals-medidas">
+            {EVALUACIONES_MEDIDAS.map((e) => (
+              <label key={e.campo} className="campo">
+                {e.titulo}
+                <textarea name={e.campo} defaultValue={ficha[e.campo] ?? ""} rows={4} />
+              </label>
+            ))}
+          </div>
         </section>
 
         {d.puedeEditarAlumno && (

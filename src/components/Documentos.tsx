@@ -18,10 +18,10 @@ export function ListaDocumentos({ apartados }: { apartados: Apartado[] }) {
           {a.descripcion && <p className="sub">{a.descripcion}</p>}
           <ul className="lista">
             {a.documentos.map((d) => {
-              const ext = d.ruta.split(".").pop()?.toLowerCase() ?? "";
-              const t = TIPO[ext];
+              const versiones = d.versiones ?? [{ ext: d.ruta.split(".").pop()?.toLowerCase() ?? "", url: urlSharePoint(d.ruta) }];
+              const t = versiones.length === 1 ? TIPO[versiones[0].ext] : undefined;
               return (
-                <li key={d.ruta}>
+                <li key={d.ruta + d.titulo}>
                   <span>
                     {d.slug ? <Link href={`/documento/${d.slug}`} style={{ fontWeight: 600 }}>{d.titulo}</Link> : <b>{d.titulo}</b>}
                     {d.nota && <span className="d"> · {d.nota}</span>}
@@ -29,7 +29,11 @@ export function ListaDocumentos({ apartados }: { apartados: Apartado[] }) {
                   <span className="chips" style={{ flexWrap: "nowrap" }}>
                     {t && <span className={`chip ${t.color}`}>{t.etq}</span>}
                     {d.slug && <Link className="btn mini pri" href={`/documento/${d.slug}`}>Leer</Link>}
-                    <a className="btn mini" href={urlSharePoint(d.ruta)} target="_blank" rel="noopener noreferrer">Abrir ↗</a>
+                    {versiones.map((v) => (
+                      <a key={v.url} className="btn mini" href={v.url} target="_blank" rel="noopener noreferrer">
+                        {versiones.length === 1 ? "Abrir" : (TIPO[v.ext]?.etq ?? v.ext.toUpperCase())} ↗
+                      </a>
+                    ))}
                   </span>
                 </li>
               );

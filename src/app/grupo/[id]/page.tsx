@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { incorporarAlSeguimiento } from "@/app/acciones";
 import { Chip, Marco } from "@/components/Marco";
-import { nombreCompleto, nombreGrupo, TIPOS_NEAE, type Alumno, type Ficha, type Grupo } from "@/lib/datos";
+import { catalogoMedidas } from "@/lib/consultas";
+import { nombreCompleto, nombreGrupo, type Alumno, type Ficha, type Grupo, type Medida } from "@/lib/datos";
 import { createClient, obtenerPerfil } from "@/lib/supabase/server";
+import { TablaSeguimiento } from "./TablaSeguimiento";
 
 type FilaPadron = { banos_alumno_id: number; nombre_seneca: string; orden: number; alumno_id: string | null };
 
@@ -26,12 +28,23 @@ export default async function PaginaGrupo({ params }: { params: Promise<{ id: st
     supabase.from("padron").select("banos_alumno_id, nombre_seneca, orden, alumno_id").eq("grupo_id", id).order("orden").returns<FilaPadron[]>(),
   ]);
   const ids = matriculas?.map((m) => m.alumno_id) ?? [];
-  const [{ data: alumnos }, { data: fichas }] = await Promise.all([
+  const [{ data: alumnos }, { data: fichas }, catalogo] = await Promise.all([
     supabase.from("alumno").select("id, nombre, apellidos, nombre_seneca").in("id", ids).returns<Alumno[]>(),
     supabase.from("ficha_curso").select("*").in("alumno_id", ids).eq("curso_academico_id", grupo.curso_academico_id).returns<Ficha[]>(),
+    catalogoMedidas(),
   ]);
+  const { data: marcadas } = await supabase.from("medida_alumno").select("ficha_id, medida_id").in("ficha_id", (fichas ?? []).map((f) => f.id)).is("evaluacion", null);
   const fichaDe = new Map(fichas?.map((f) => [f.alumno_id, f]));
   const seguimiento = [...(alumnos ?? [])].sort((a, b) => nombreCompleto(a).localeCompare(nombreCompleto(b), "es"));
+  const filas = seguimiento.map((a) => {
+    const f = fichaDe.get(a.id);
+    return {
+      id: a.id,
+      nombre: nombreCompleto(a),
+      ficha: f ? { censado: f.censado, tipo_neae: f.tipo_neae, dictamen: f.dictamen, diagnostico: f.diagnostico } : null,
+      medidas: (marcadas ?? []).filter((m) => m.ficha_id === f?.id).map((m) => m.medida_id),
+    };
+  });
 
   const esTutor = grupo.tutor?.email?.toLowerCase() === perfil.email?.toLowerCase();
   const puedeEditar = perfil.rol === "orientacion" || (esTutor && grupo.curso.activo);
@@ -62,38 +75,18 @@ export default async function PaginaGrupo({ params }: { params: Promise<{ id: st
         {seguimiento.length === 0 ? (
           <p className="vacio">Nadie en seguimiento en este grupo.</p>
         ) : (
-          <div className="tabla-wrap">
-            <table className="datos">
-              <thead>
-                <tr><th>Alumno/a</th><th>Séneca</th><th>NEAE</th><th>Diagnóstico</th></tr>
-              </thead>
-              <tbody>
-                {seguimiento.map((a) => {
-                  const f = fichaDe.get(a.id);
-                  return (
-                    <tr key={a.id}>
-                      <td><Link href={`/alumno/${a.id}?curso=${grupo.curso_academico_id}`} style={{ fontWeight: 600 }}>{nombreCompleto(a)}</Link></td>
-                      <td>{!f ? <Chip>Sin ficha</Chip> : f.censado ? <Chip color="azul">Censado</Chip> : <Chip color="naranja">Sin censar</Chip>}</td>
-                      <td title={f?.tipo_neae ? TIPOS_NEAE[f.tipo_neae] : undefined}>
-                        <div className="chips">
-                          {f?.tipo_neae ? <Chip color="verde">{f.tipo_neae}</Chip> : <span className="muted">—</span>}
-                          {f?.dictamen && <Chip color="morado">Dictamen</Chip>}
-                        </div>
-                      </td>
-                      <td className="muted small">{f?.diagnostico?.split("\n").slice(0, 2).join(" · ") ?? ""}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <TablaSeguimiento filas={filas} medidas={catalogo as Medida[]} cursoId={grupo.curso_academico_id} />
         )}
       </section>
 
-      <section className="panel">
-        <h2 className="verde">Lista de clase <span className="muted small" style={{ fontWeight: 400 }}>· {padron?.length ?? 0} alumnos, de Control de baños</span></h2>
+      <details className="panel plegable">
+        <summary>
+          <span className="flechita" />
+          <h2 className="verde">Lista de clase <span className="muted small" style={{ fontWeight: 400 }}>· {padron?.length ?? 0} alumnos, de «Acceso a Microsoft 365»</span></h2>
+        </summary>
+        <div className="plegable-cuerpo">
         {!padron?.length ? (
-          <p className="vacio">Este grupo no está enlazado con una clase de Control de baños.</p>
+          <p className="vacio">Este grupo no está enlazado con una clase de «Acceso a Microsoft 365».</p>
         ) : (
           <ul className="lista">
             {padron.map((p) => (
@@ -119,7 +112,8 @@ export default async function PaginaGrupo({ params }: { params: Promise<{ id: st
             ))}
           </ul>
         )}
-      </section>
+        </div>
+      </details>
     </Marco>
   );
 }

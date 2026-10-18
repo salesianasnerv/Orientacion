@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { crearFichaCurso } from "@/app/acciones";
 import { Chip, Marco } from "@/components/Marco";
-import { BLOQUES, GRUPOS_DE_BLOQUES, nombreCompleto, nombreGrupo, TIPOS_NEAE } from "@/lib/datos";
+import { BLOQUES, EVALUACIONES_MEDIDAS, GRUPOS_DE_BLOQUES, nombreCompleto, nombreGrupo, TIPOS_NEAE } from "@/lib/datos";
 import { obtenerPerfil } from "@/lib/supabase/server";
 import { cargarAlumno } from "./cargar";
 
@@ -13,7 +13,7 @@ export default async function PaginaAlumno({ params, searchParams }: { params: P
 
   const d = await cargarAlumno(id, cursoParam);
   if (!d) notFound();
-  const { alumno, curso, cursosAlumno, ficha, matricula, grupo, historial, medidas } = d;
+  const { alumno, curso, cursosAlumno, ficha, matricula, grupo, historial, medidas, pendientes } = d;
 
   return (
     <Marco
@@ -37,6 +37,7 @@ export default async function PaginaAlumno({ params, searchParams }: { params: P
           {cursosAlumno.length > 1 && cursosAlumno.map((c) => (
             <Link key={c.id} href={`/alumno/${id}?curso=${c.id}`} className={`btn mini ${c.id === curso?.id ? "pri" : ""}`}>{c.nombre}</Link>
           ))}
+          {ficha && <Link href={`/alumno/${id}/seguimiento?curso=${curso?.id}`} className="btn">Generar documento de seguimiento</Link>}
           {d.puedeEditar && ficha && <Link href={`/alumno/${id}/editar?curso=${curso?.id}`} className="btn pri">Editar ficha</Link>}
           {!d.puedeEditar && <Chip>Solo consulta</Chip>}
         </div>
@@ -63,11 +64,25 @@ export default async function PaginaAlumno({ params, searchParams }: { params: P
                   {ficha.censado ? <Chip color="azul">Censado en Séneca</Chip> : <Chip color="naranja">Sin censar</Chip>}
                   {ficha.tipo_neae ? <Chip color="verde">{TIPOS_NEAE[ficha.tipo_neae] ?? ficha.tipo_neae}</Chip> : <Chip>Sin tipo de NEAE</Chip>}
                   {ficha.dictamen && <Chip color="morado">Dictamen de escolarización</Chip>}
-                  {matricula?.materias_pendientes && <Chip color="rojo">Pendientes: {matricula.materias_pendientes}</Chip>}
+                  {!pendientes.length && matricula?.materias_pendientes && <Chip color="rojo">Pendientes: {matricula.materias_pendientes}</Chip>}
                 </div>
                 <h3>Diagnóstico</h3>
                 {ficha.diagnostico ? <p className="texto-largo">{ficha.diagnostico}</p> : <p className="muted">—</p>}
               </section>
+
+              {pendientes.length > 0 && (
+                <section className="panel">
+                  <h2>Materias pendientes</h2>
+                  <table className="datos">
+                    <thead><tr><th>Curso</th><th>Materia</th><th>Seguimiento (programa de refuerzo)</th></tr></thead>
+                    <tbody>
+                      {pendientes.map((p, i) => (
+                        <tr key={i}><td className="nowrap">{p.nivel}</td><td>{p.materia}</td><td>{p.profesor ?? <span className="muted">Sin asignar</span>}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              )}
 
               <section className="panel">
                 <h2 className="naranja">Medidas {curso?.nombre}</h2>
@@ -93,12 +108,20 @@ export default async function PaginaAlumno({ params, searchParams }: { params: P
                     </div>
                   );
                 })}
-                {ficha.propuesta_medidas && (
-                  <details className="notas">
-                    <summary>Notas y concreción de las medidas</summary>
-                    <p className="texto-largo">{ficha.propuesta_medidas}</p>
-                  </details>
-                )}
+                <details className="notas" open={!!ficha.propuesta_medidas || EVALUACIONES_MEDIDAS.some((e) => ficha[e.campo])}>
+                  <summary>Notas y concreción de las medidas</summary>
+                  <h3>Aspectos a tener en cuenta</h3>
+                  {ficha.propuesta_medidas ? <p className="texto-largo">{ficha.propuesta_medidas}</p> : <p className="muted">—</p>}
+                  <h3>Evaluación de las medidas</h3>
+                  <div className="evals-medidas">
+                    {EVALUACIONES_MEDIDAS.map((e) => (
+                      <div key={e.campo}>
+                        <div className="muted small"><b>{e.titulo}</b></div>
+                        {ficha[e.campo] ? <p className="texto-largo">{ficha[e.campo]}</p> : <p className="muted">—</p>}
+                      </div>
+                    ))}
+                  </div>
+                </details>
               </section>
             </>
           )}
