@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fira_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { RegistrarSW } from "@/components/RegistrarSW";
 
@@ -43,6 +44,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <RegistrarSW />
+        {/* Barra «Volver al portal»: solo sale si se llega desde el portal del profesorado */}
+        <Script src="https://claustro-utilidades.vercel.app/barra.js" strategy="afterInteractive" />
         <footer className="pie">Escuelas Salesianas María Auxiliadora · Nervión (Sevilla)</footer>
       </body>
     </html>
